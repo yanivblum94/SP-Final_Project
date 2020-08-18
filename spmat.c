@@ -1,3 +1,4 @@
+
 #include "spmat.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -7,18 +8,7 @@
 #include <math.h>
 #include <string.h>
 
-typedef struct _linked_list{
 
-	/*value*/
-	double val;
-
-	/*column index*/
-	int col;
-
-	/*next pointer*/
-	struct _linked_list* next;
-
-}linked_list;
 
 
 void add_row_in_list(struct _spmat *A, const int *row, int i){
@@ -71,7 +61,7 @@ void free_in_list(struct _spmat *A){
 }
 
 
-void mult_in_list(const struct _spmat *A, const double *v, double *result){
+void mult_matrix_with_vector(const struct _spmat *A, const double *v, double *result){
 	int i, j, n;
 	double dotproduct;
 	linked_list *currlist;
@@ -87,6 +77,21 @@ void mult_in_list(const struct _spmat *A, const double *v, double *result){
 		result[i] = dotproduct;
 	}
 }
+
+void mult_vector_with_matrix(const struct _spmat *A, const double *v, double *result){
+	int i, j, n;
+	double dotproduct;
+	linked_list *currlist;
+	n = A->n;
+	for(i = 0; i < n; i++){
+		dotproduct = 0.0;
+		for(j = 0; j < n; j++){
+			dotproduct += (double)(*(v+j))*(*(A+i+n*j));
+		}
+		result[i] = dotproduct;
+	}
+}
+
 
 
 /* Allocates a new linked-lists sparse matrix of size n */
@@ -111,35 +116,13 @@ spmat* spmat_allocate(int n){
 				matrix->free(matrix);
 				return NULL;
 		}
-	matrix->mult = &mult_in_list;
+	matrix->mult = &mult_matrix_with_vector;
 	if(matrix->mult==NULL){
 				matrix->free(matrix);
 				return NULL;
 		}
 	return matrix;
 
-}
-spmat* create_B(spmat* A, int* ranks, int m, int size){
-	spmat* B;
-	double* row;
-	int i,j,col;
-	B = spmat_allocate(size);
-	for(i=0; i<size; i++){
-		row = calloc(size, sizeof(double));
-		linked_list curr = A->private[i];
-		col = curr.col;
-		for(j=0; j< size; j++){
-			if(j==col){
-				row[j] = 1 - ((ranks[j]*ranks[i])/m);
-				curr = curr.next;
-			}
-			else{
-				row[j] = 0 - ((ranks[j]*ranks[i])/m);
-			}
-		}
-		B->add_row(row);
-	}
-	return B;
 }
 
 
