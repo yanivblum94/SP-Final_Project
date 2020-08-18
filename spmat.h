@@ -1,3 +1,8 @@
+
+
+#ifndef SPMAT_H_
+#define SPMAT_H_
+
 #ifndef _SPMAT_H
 #define _SPMAT_H
 
@@ -20,9 +25,24 @@ typedef struct _spmat {
 	void	*private;
 } spmat;
 
+typedef struct _linked_list{
+
+	/*value*/
+	double val;
+
+	/*column index*/
+	int col;
+
+	/*next pointer*/
+	struct _linked_list* next;
+
+}linked_list;
+
 /* Allocates a new linked-lists sparse matrix of size n */
 spmat* spmat_allocate(int n);
 
 spmat* create_B(spmat* A, int* ranks, int m, int size);
 
 #endif
+
+#endif /* SPMAT_H_ */
