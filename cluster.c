@@ -16,11 +16,8 @@ spmat* read_mat(FILE *input, int* ranks, int size){
 	for(i=0; i<size; i++){
 		fread(&k, sizeof(int), 1, input);
 		ranks[i] = k;
-		row = calloc(size, sizeof(double));
-		for(j=0; j<k; j++){
-			fread(&temp, sizeof(int), 1, input);
-			row[temp] = 1.0;
-		}
+		row = calloc(k, sizeof(double));
+		fread(&row, sizeof(int), k, input);
 		A->add_row(row);
 	}
 	return A;
