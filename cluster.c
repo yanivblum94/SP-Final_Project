@@ -1,3 +1,9 @@
+/*
+ * cluster.c
+ *
+ *  Created on: 17 באוג׳ 2020
+ *      Author: irist
+ */
 #include "spmat.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -23,6 +29,7 @@ spmat* read_mat(FILE *input, int* ranks, int size){
 	return A;
 }
 
+
 int calc_M(int* ranks,int size){
 	int i, m=0;
 	for(i=0; i< size; i++){
@@ -44,3 +51,4 @@ int main(int argc, char* argv[]){
 	m = calc_M(ranks,size);
 	B = create_B(A, ranks, m, size);
 }
+
