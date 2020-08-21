@@ -1,4 +1,13 @@
+/*
+ * module_alg.c
+ *
+ *  Created on: 18 באוג׳ 2020
+ *      Author: irist
+ */
+
 #include "spmat.h"
+#include "eigen_pair.h"
+#include "B_matrix.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
@@ -25,3 +34,42 @@ double calc_Q(int* s, spmat* B, int n){
 	q = 0.5*mult_vectors(result,s);
 	return q;
 }
+
+int divition_to_2(spmat* B, int* g, int n){
+	double eigen_val;
+	double *eigenvector;
+	int *s, i, is_divisible;
+	is_divisible = 1;
+	eigenvector = (double*)malloc(n*sizeof(double));
+	s = (int*)malloc(n*sizeof(int));
+	spmat *Bg = (spmat*)malloc(sizeof(spmat));
+	calc_Bg(B, Bg, g, n);
+	calc_Bg_bar(Bg, n);
+	eigen_val = calc_B_eigen_pair(Bg, eigenvector, n);
+	if(eigen_val <= 0){//The group is indivisible
+		is_divisible = 0;
+	}
+	else{
+		for(i = 0; i < n; i++){
+			if(eigenvector[i] > 0){
+				s[i] = 1;
+			}
+			else{
+				s[i] = -1;
+			}
+		}
+	}
+	if(calc_Q(s, B, n) <= 0){//The group is indivisible
+		is_divisible = 0;
+	}
+	else{
+		for(i = 0; i < n; i++){
+			if(g[i] != 0){
+				g[i] = s[i];
+			}
+		}
+	}
+	return is_divisible;
+}
+
+
