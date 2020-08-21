@@ -1,4 +1,9 @@
-
+/*
+ * spmat.h
+ *
+ *  Created on: 17 באוג׳ 2020
+ *      Author: irist
+ */
 
 #ifndef SPMAT_H_
 #define SPMAT_H_
@@ -12,7 +17,7 @@ typedef struct _spmat {
 
 	/* Adds row i the matrix. Called before any other call,
 	 * exactly n times in order (i = 0 to n-1) */
-	void	(*add_row)(struct _spmat *A, const double *row, int i, int size);
+	void	(*add_row)(struct _spmat *A, const double *row, int i);
 
 	/* Frees all resources used by A */
 	void	(*free)(struct _spmat *A);
@@ -41,7 +46,23 @@ typedef struct _linked_list{
 /* Allocates a new linked-lists sparse matrix of size n */
 spmat* spmat_allocate(int n);
 
-spmat* create_B(spmat* A, int* ranks, int m, int size);
+void add_row_in_list(struct _spmat *A, const double *row, int i);
+
+void free_in_list(struct _spmat *A);
+
+void mult_matrix_with_vector(const struct _spmat *A, const double *v, double *result);
+
+void mult_vector_with_matrix(const struct _spmat *A, const double *v, double *result);
+
+void create_IC(spmat* i_matrix, int size, double c);
+
+void calc_shift(const struct _spmat *A, spmat *shifted_matrix);
+
+
+
+
+
+/*spmat* create_B(spmat* A, int* ranks, int m, int size);*/
 
 #endif
 
