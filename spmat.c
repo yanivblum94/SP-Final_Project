@@ -114,7 +114,19 @@ void mult_matrix_with_vector(const struct _spmat *A, const double *v, double *re
 }
 
 void mult_vector_with_matrix(const struct _spmat *A, const double *v, double *result){
-
+	int i, j, n;
+	double dotproduct;
+	linked_list *currlist;
+	n = A->n;
+	for(i = 0; i < n; i++){
+		dotproduct = 0.0;
+		currlist = ((linked_list**)(A -> private))[i];
+		while(currlist != NULL){
+				dotproduct += (double)(currlist->val * v[i]);
+				currlist = currlist->next;
+			}
+		result[i] = dotproduct;
+	}
 }
 
 /*claculate 1-norm of the matrix*/
@@ -154,17 +166,16 @@ void create_IC(spmat* i_matrix, int size, double c){
 	for(i = 0; i < size; i++){
 		add_row(i_matrix, row, size);
 	}
+	free(row);
 }
 
 /*Calculate the shifted matrix C'*/
 void calc_shift(const struct _spmat *A, spmat *shifted_matrix){
 	int i, n;
 	double c = calc_norm_1(A);
-	double *row;
 	linked_list *currlist1, *currlist2;
 	n = A->n;
 	shifted_matrix = create_IC(A, n, c);
-	row = (double*)malloc(n*sizeof(double));
 	for(i = 0; i < n; i++){
 		currlist1 = (double*)(shifted_matrix->private)[i];
 		currlist2 = (double*)(A->private)[i];
