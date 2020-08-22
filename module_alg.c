@@ -32,6 +32,7 @@ double calc_Q(int* s, spmat* B, int n){
 	double *result = (double*)malloc(n*sizeof(double));
 	mult_vector_with_matrix(B, s, result);
 	q = 0.5*mult_vectors(result,s);
+	free(result);
 	return q;
 }
 
@@ -69,6 +70,9 @@ int divition_to_2(spmat* B, int* g, int n){
 			}
 		}
 	}
+	free(eigenvector);
+	free(s);
+	free_in_list(Bg);
 	return is_divisible;
 }
 
