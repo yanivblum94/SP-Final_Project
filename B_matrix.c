@@ -35,6 +35,7 @@ spmat* create_B(spmat* A, int* ranks, int m, int size){
 			}
 		}
 		B->add_row(row);
+		free(row);
 	}
 	return B;
 }
