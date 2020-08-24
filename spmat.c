@@ -159,14 +159,12 @@ double calc_norm_1(const struct _spmat *A){
 void create_IC(spmat* i_matrix, int size, double c){
 	int i;
 	double *row;
-	row = (double*)malloc(size*sizeof(double));
 	for(i = 0; i < size; i++){
+		row = (double*)calloc(size,sizeof(double));
 		row[i] = c;
+		add_row(i_matrix, row, i);
+		free(row);
 	}
-	for(i = 0; i < size; i++){
-		add_row(i_matrix, row, size);
-	}
-	free(row);
 }
 
 /*Calculate the shifted matrix C'*/
