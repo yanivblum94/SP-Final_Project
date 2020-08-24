@@ -69,6 +69,8 @@ int main(int argc, char* argv[]){
 	fclose(input);
 	m = calc_M(ranks,size);
 	B = create_B(A, ranks, m, size);
+
+	
 	
 	free(ranks);
 	free_in_list(A);
