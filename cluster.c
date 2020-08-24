@@ -126,6 +126,10 @@ int main(int argc, char* argv[]){
 	for(i=0; i<size; i++){
 		temp = calc_set_size(sets[i]);
 		if(temp>0){
+			asserter = fwrite(&temp, sizeof(int),1,output);
+						if(asserter!=1){
+							return 1;
+						}
 			int* set = (int*)calloc(temp, sizeof(int));
 			list_to_arr(set, sets[i], temp);
 			asserter = fwrite(&set, sizeof(int),temp,output);
