@@ -36,7 +36,7 @@ double calc_Q(int* s, spmat* B, int n){
 	return q;
 }
 
-int divition_to_2(spmat* B, int* g, int n){
+int division_to_2(spmat* B, int* g, int n){
 	double eigen_val;
 	double *eigenvector;
 	int *s, i, is_divisible;
@@ -70,6 +70,8 @@ int divition_to_2(spmat* B, int* g, int n){
 			}
 		}
 	}
+	
+	
 	free(eigenvector);
 	free(s);
 	free_in_list(Bg);
