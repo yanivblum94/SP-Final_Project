@@ -22,7 +22,7 @@ spmat* create_B(spmat* A, int* ranks, int m, int size){
 	int i,j,col;
 	B = spmat_allocate(size);
 	for(i=0; i<size; i++){
-		row = calloc(size, sizeof(double));
+		row = (double*)calloc(size, sizeof(double));
 		linked_list *curr = (linked_list*)(A->private[i]);
 		col = curr->col;
 		for(j=0; j< size; j++){
@@ -63,7 +63,7 @@ void calc_Bg(spmat* B, spmat* Bg, int* g, int size){
 	copy_matrix(B, Bg, size);
 	arr = (linked_list*)(Bg->private);
 	for(i = 0; i < size; i++){
-		if(g[i] != 0){
+		if(g[i] == 0){
 			arr[i] = NULL;
 		}
 		for(j = 0; j < size; j++){
