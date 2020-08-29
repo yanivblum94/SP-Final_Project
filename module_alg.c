@@ -92,53 +92,57 @@ int division_to_2(spmat* B, int* g, int n){
 	return is_divisible;
 }
 
-void add_group(node** groups, int* group, int n){
-	int i, j, first;
-	node *curr, *elem;
-	i = 0;
+void arry_to_list(node* list, int* array, int n){
+	node* curr_node, elem;
+	int i, first;
 	first = 1;
-	while(groups[i] != NULL){
-		i++;
-	}
-	for(j = 0; j < n; j++){
-		if(group[j] != 0){
-			elem = (node*)malloc(1*sizeof(node));
-			elem->val = group[j];
+	for(i = 0; i < n; i++){
+		if(array[i] != 0){
+			elem = (node*)malloc(sizeof(node));
+			elem->val = i;
 			elem->next = NULL;
 			if(first){
-				curr = elem;
-				groups[i] = curr;
+				curr_node = elem;
 				first = 0;
 			}
 			else{
-				curr->next = elem;
-				curr= curr->next;
-				curr->next = NULL;
+				curr_node->next = elem;
+				curr_node= curr_node->next;
+				curr_node->next = NULL;
 			}
 		}
 	}
 }
 
-void remove_group(node** groups, int* group){
-	int i;
-	node *elem;
-	i = 0;
-	while(groups[i] == NULL){
-		i++;
-	}
-	elem = groups[i];
-	while(elem != NULL){
-		group[elem->val] = 1;
+void list_to_array(node* list, int* array){
+	while(list != NULL){
+		array[list->val] = 1;
+		list = list->next;
 	}
 }
 
-int is_empty(node** groups, int n){
-	int i;
-	i = 0;
-	while((i < n) && (groups[i] == NULL)){
-		i++;
+
+void add_group(list_of_lists* groups, node* group){
+	list_of_lists *new_group;
+	while(groups->next != NULL){
+		groups = groups->next;
 	}
-	if(i == n){
+	new_group = (list_of_lists*)malloc(sizeof(list_of_lists));
+	new_group->node = group;
+	new_group->next = NULL;
+	groups->next = new_group;
+}
+
+node* remove_group(list_of_lists* groups){
+	list_of_lists* elem_to_remove;
+	node *group = groups->node;
+	elem_to_remove = groups;
+	*(groups) = groups->next;
+	free(elem_to_remove);
+}
+
+int is_empty(list_of_lists* groups){
+	if(groups == NULL){
 		return 1;
 	}
 	else{
@@ -146,12 +150,12 @@ int is_empty(node** groups, int n){
 	}
 }
 
-node** devide_network(spmat* B, int* g, int n){
+list_of_lists* devide_network(spmat* B, int* g, int n){
 	int i, j, is_divisible, *g, *g1, *g2;
-	int curr_ind_O, curr_ind_P;
-	node **groups, **non_divisible_groups, curr;
-	groups = (node**)malloc(n*sizeof(node*));
-	non_divisible_groups = (node**)malloc(n*sizeof(node*));
+	/*int curr_ind_O, curr_ind_P;*/
+	list_of_lists *groups, *non_divisible_groups;
+	groups = (list_of_lists*)malloc(sizeof(list_of_lists));
+	non_divisible_groups = (list_of_lists*)malloc(sizeof(list_of_lists));
 	g = (int*)calloc(n, sizeof(int));
 	/*create the first group*/
 	for(i = 0; i < n; i++){
@@ -160,7 +164,9 @@ node** devide_network(spmat* B, int* g, int n){
 	is_divisible = division_to_2(B, g, n);
 	if(!is_divisible){
 		/*add g to O*/
-		add_group(non_divisible_groups, g, n);
+		node* group;/* = (node)malloc(sizeof(node));*/
+		arry_to_list(group, g, n);
+		add_group(non_divisible_groups, group);
 	}
 	else{
 		/*add the 2 groups to P*/
@@ -174,45 +180,59 @@ node** devide_network(spmat* B, int* g, int n){
 				g2[j] = -1;
 			}
 		}
-		add_group(groups, g1, n);
-		add_group(groups, g2, n);
+		node* group1;/* = (node)malloc(sizeof(node));*/
+		node* group2;/* = (node)malloc(sizeof(node));*/
+		arry_to_list(group1, g1, n);
+		arry_to_list(group2, g2, n);
+		add_group(groups, group1);
+		add_group(groups, group2);
 		free(g1);
 		free(g2);
 	}
 	free(g);
-	while(!is_empty(groups, n)){
+	while(!is_empty(groups)){
 		/*remove a group from P and represent the group as an int array g*/
+		node *group = (node)malloc(sizeof(node));
+		remove_group(groups, group);
 		g = (int*)calloc(n, sizeof(int));
-		remove_group(groups, g);
+		list_to_array(group, g);
 		is_divisible = division_to_2(B, g, n);
 			if(!is_divisible){
 				/*add g to O*/
-				add_group(non_divisible_groups, g, n);
+				node* group = (node)malloc(sizeof(node));
+				arry_to_list(group, g, n);
+				add_group(non_divisible_groups, group);
 			}
 			else{
-				/*if one of the groups is empty or has only one element*/
-
-
-
-
-				/*else*/
-				/*add the 2 groups to P*/
 				g1 = (int*)calloc(n, sizeof(int));
 				g2 = (int*)calloc(n, sizeof(int));
-					for(j = 0; j < n; j++){
-						if(g[j] == 1){
-							g1[j] = 1;
-						}
-						else if(g[j] == -1){
-							g2[j] = -1;
-						}
+				for(j = 0; j < n; j++){
+					if(g[j] == 1){
+						g1[j] = 1;
 					}
-					add_group(groups, g1, n);
-					add_group(groups, g2, n);
-					free(g1);
-					free(g2);
+					else if(g[j] == -1){
+						g2[j] = -1;
+					}
+				}
+				node* group1 = (node)malloc(sizeof(node));
+				node* group2 = (node)malloc(sizeof(node));
+				arry_to_list(group1, g1, n);
+				arry_to_list(group2, g2, n);
+				/*if one of the groups is empty or has only one element*/
+				if((group1 == NULL) || (group1->next == NULL)){ /*size of 0 or 1*/
+					add_group(non_divisible_groups, group1);/*add to O*/
+				}
+				else{
+					add_group(groups, group1);/*add to P*/
+				}
+				if((group2 == NULL) || (group2->next == NULL)){ /*size of 0 or 1*/
+					add_group(non_divisible_groups, group2);/*add to O*/
+				}
+				else{
+					add_group(groups, group2);/*add to P*/
+				}
+
 			}
-			free(g);
 	}
 	return non_divisible_groups;
 }
