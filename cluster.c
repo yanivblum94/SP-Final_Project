@@ -45,27 +45,28 @@ int calc_M(int* ranks,int size){
 	return m;
 }
 
-int calc_set_size(linked_list* set){
-	linked_list curr = set;
+int calc_set_size(node* set){
+	node curr = set;
 	int res =0;
 	if(set == NULL){
 		return res;
 	}
-	while(set!= NULL){
+	while(curr!= NULL){
 		res++;
 		curr = curr.next;
 	}
+	free(curr);
 	return res;
 }
 
-int calc_num_sets(linked_list** sets, int size){
-	int i,res;
+int calc_num_sets(list_of_lists* sets){
+	int res;
+	list_of_lists*curr =  sets;
 	res=0;
-	for(i=0; i<size; i++){
-		if(sets[i] !=NULL){
-			res++;
-		}
+	while(curr!=NULL){
+		curr = curr->next;
 	}
+	free(curr);
 	return res;
 }
 
@@ -79,9 +80,9 @@ int compare( const void* a, const void* b)
      else return 1;
 }
 
-void list_to_arr(int* arr, linked_list* set, int size){
+void list_to_arr(int* arr, node* set, int size){
 	int i;
-	linked_list curr = set;
+	node curr = set;
 	for(i=0; i<size; i++){
 		arr[i] = curr.val;
 		curr = curr.next;
@@ -95,7 +96,7 @@ int main(int argc, char* argv[]){
 	spmat *A, *B;
 	int *ranks;
 	int size,m, n,sets_num,temp,i,asserter;
-	linked_list** sets = (linked_list**)malloc(n*sizeof(linked_list*));
+	list_of_lists* sets;
 	input = fopen(argv[1], "r");
 	if(input == NULL){
 		printf("Error in reading the file");
@@ -114,31 +115,30 @@ int main(int argc, char* argv[]){
 	fclose(input);
 	m = calc_M(ranks,size);
 	B = create_B(A, ranks, m, size);
-
-	
-	
-	sets_num = calc_num_sets(sets,size);
+	sets = divide_network(B,size);
+	sets_num = calc_num_sets(sets);
 	output = fopen(argv[2], "w");
 	temp = fwrite(&sets_num, sizeof(int),1,output);/*write num of sets*/
 	if(temp!=1){
 		return 1;
 	}
-	for(i=0; i<size; i++){
-		temp = calc_set_size(sets[i]);
-		if(temp>0){
-			asserter = fwrite(&temp, sizeof(int),1,output);
-						if(asserter!=1){
-							return 1;
-						}
-			int* set = (int*)calloc(temp, sizeof(int));
-			list_to_arr(set, sets[i], temp);
-			asserter = fwrite(&set, sizeof(int),temp,output);
-			if(asserter!=temp){
-				return 1;
-			}
+	while(sets!=NULL){
+		temp = calc_set_size(sets->node);
+		asserter = fwrite(&temp, sizeof(int),1,output);
+					if(asserter!=1){
+						return 1;
+					}
+		int* set = (int*)calloc(temp, sizeof(int));
+		list_to_arr(set, sets[i], temp);
+		asserter = fwrite(&set, sizeof(int),temp,output);
+		if(asserter!=temp){
+			return 1;
 		}
+		sets=sets->next;
+		free(set);
 	}
 	free(ranks);
+	free(sets);
 	fclose(output);
 	free_in_list(A);
 	free_in_list(B);

@@ -1,7 +1,7 @@
 /*
  * module_alg.c
  *
- *  Created on: 18 באוג׳ 2020
+ *  Created on: 18 ×‘×�×•×’×³ 2020
  *      Author: irist
  */
 
@@ -139,6 +139,7 @@ node* remove_group(list_of_lists* groups){
 	elem_to_remove = groups;
 	*(groups) = groups->next;
 	free(elem_to_remove);
+	return group;
 }
 
 int is_empty(list_of_lists* groups){
@@ -150,9 +151,10 @@ int is_empty(list_of_lists* groups){
 	}
 }
 
-list_of_lists* devide_network(spmat* B, int* g, int n){
+list_of_lists* devide_network(spmat* B, int n){
 	int i, j, is_divisible, *g, *g1, *g2;
 	/*int curr_ind_O, curr_ind_P;*/
+	int *g;
 	list_of_lists *groups, *non_divisible_groups;
 	groups = (list_of_lists*)malloc(sizeof(list_of_lists));
 	non_divisible_groups = (list_of_lists*)malloc(sizeof(list_of_lists));
@@ -234,6 +236,7 @@ list_of_lists* devide_network(spmat* B, int* g, int n){
 
 			}
 	}
+	free(g);
 	return non_divisible_groups;
 }
 
