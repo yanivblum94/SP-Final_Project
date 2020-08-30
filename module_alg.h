@@ -1,7 +1,7 @@
 /*
  * module_alg.h
  *
- *  Created on: 18 באוג׳ 2020
+ *  Created on: 18 ×‘×�×•×’×³ 2020
  *      Author: irist
  */
 #include "spmat.h"
@@ -34,6 +34,14 @@ double calc_Q(int* s, spmat* B, int n);
 int mult_vectors(const double *v1, const double *v2, int n);
 
 int* divition_to_2(spmat* B_g_bar, int n);
+
+double calculate_deltaQ(int* s, spmat* B);
+
+void indices_start(int* indices,int n);
+
+int unmoved_start(int* unmoved,int n,int* s);
+
+void modularity_maximization(spmat* BgHat , int* s);
 
 
 

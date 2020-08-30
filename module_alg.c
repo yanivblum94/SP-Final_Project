@@ -240,3 +240,90 @@ list_of_lists* devide_network(spmat* B, int n){
 	return non_divisible_groups;
 }
 
+/* calculate Q: by definition */
+double calculate_deltaQ(int* s, spmat* B){
+	double result, *temp=(double*)calloc(1,sizeof(B->n));
+	multMatrix(B,s,temp);
+	result=multVec(s,temp);
+	return (result*0.5);
+
+
+}
+
+/* initial array values to -1 */
+void indices_start(int* indices,int n){
+	int i;
+	for (i = 0; i < n; ++i) {
+		indices[i]=-1;
+	}
+}
+/* initial array unmoved to 1 if vertex on g */
+int unmoved_start(int* unmoved,int n,int* s){
+	int i,ng=0;
+	for (i = 0; i < n; ++i) {	/*making the unmoved group represnted by array*/
+			if(s[i]!=0){
+				unmoved[i]=1;
+				++ng;
+			}
+		}
+	return ng;
+}
+
+void modularity_maximization(spmat* BgHat , int* s){
+	double* score ,improve ;
+	double Q0,maxscore,maxImprove,deltaQ=0;
+	int n ,ng, i,j ,maxScoreVertex,maxImproveIndex;;
+	int* unmoved,indices;
+	n=BgHat->n;
+	unmoved=(int*)calloc(1,sizeof(n));
+	indices=(int*)calloc(1,sizeof(n));
+	score=(double*)calloc(1,sizeof(n));
+	improve=(double*)calloc(1,sizeof(n));
+	indices_start(indices,n);
+	ng=unmoved_start(unmoved,n,s);
+	while(deltaQ>=0){	/* main while according to line 31 of the alg'*/
+	for (i = 0; i < ng; ++i) {	/* lines 3-20 alg4*/
+			Q0 = (calculate_deltaQ(s,BgHat)*2);
+			s[0]=-s[0];
+			score[0]=(calculate_deltaQ(s,BgHat)*2)-Q0;
+			maxscore=score[0];
+			maxScoreVertex=0;
+			s[0]=-s[0];
+
+			for (j = 1; j < n; ++j) {/*for lines 6-10 on alg4 */
+				if(unmoved[j]!=0){
+					s[j]=-s[j];
+					score[j]=(calculate_deltaQ(s,BgHat)*2)-Q0;
+					s[j]=-s[j];
+					if(score[j]>maxscore){
+						maxScoreVertex=j;
+						maxscore=score[j];
+					}
+				}
+			}
+			s[maxScoreVertex]=-s[maxScoreVertex];
+			indices[i]=maxScoreVertex;
+			if(i==0){
+				improve[i]=score[maxScoreVertex];
+				maxImprove=improve[i];
+				maxImproveIndex=i;
+			}else{
+				improve[i]=improve[i-1]+score[maxScoreVertex];
+				if(improve[i]>maxImprove){ /*maintain maximprove for next part*/
+					maxImprove=improve[i];
+					maxImproveIndex=i;
+				}
+			}
+			unmoved[maxScoreVertex]=0;
+		}
+	for(i=ng-1;i>maxImproveIndex;--i){
+		s[indices[i]]=-s[indices[i]];
+	}
+	if(maxImproveIndex==(ng-1)){
+		deltaQ=0;
+	}else{
+		deltaQ=improve[maxImproveIndex];
+		}
+	}
+}
+
