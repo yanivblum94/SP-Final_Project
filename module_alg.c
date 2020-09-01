@@ -1,7 +1,6 @@
 /*
  * module_alg.c
  *
- *  Created on: 18 ×‘×�×•×’×³ 2020
  *      Author: irist
  */
 
@@ -163,35 +162,11 @@ list_of_lists* devide_network(spmat* B, int n){
 	for(i = 0; i < n; i++){
 		g[i] = 1;
 	}
-	is_divisible = division_to_2(B, g, n);
-	if(!is_divisible){
-		/*add g to O*/
-		node* group;/* = (node)malloc(sizeof(node));*/
-		arry_to_list(group, g, n);
-		add_group(non_divisible_groups, group);
-	}
-	else{
-		/*add the 2 groups to P*/
-		g1 = (int*)calloc(n, sizeof(int));
-		g2 = (int*)calloc(n, sizeof(int));
-		for(j = 0; j < n; j++){
-			if(g[j] == 1){
-				g1[j] = 1;
-			}
-			else if(g[j] == -1){
-				g2[j] = -1;
-			}
-		}
-		node* group1;/* = (node)malloc(sizeof(node));*/
-		node* group2;/* = (node)malloc(sizeof(node));*/
-		arry_to_list(group1, g1, n);
-		arry_to_list(group2, g2, n);
-		add_group(groups, group1);
-		add_group(groups, group2);
-		free(g1);
-		free(g2);
-	}
+	node* group;
+	arry_to_list(group, g, n);
+	add_group(groups, group);
 	free(g);
+	free(group);
 	while(!is_empty(groups)){
 		/*remove a group from P and represent the group as an int array g*/
 		node *group = (node)malloc(sizeof(node));
@@ -233,7 +208,6 @@ list_of_lists* devide_network(spmat* B, int n){
 				else{
 					add_group(groups, group2);/*add to P*/
 				}
-
 			}
 	}
 	free(g);
