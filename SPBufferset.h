@@ -1,3 +1,10 @@
+/*
+ * SPBufferset.h
+ *
+ *  Created on: 17 баев„ 2020
+ *      Author: irist
+ */
+
 #include <stdio.h>
 
 #ifndef SPBUFFERSET_H_
@@ -14,3 +21,4 @@
 #endif
 
 #endif /* SPBUFFERSET_H_ */
+

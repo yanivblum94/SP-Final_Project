@@ -17,7 +17,16 @@
 #include "module_alg.h"
 
 
-int mult_vectors(const double *v1, const double *v2, int n){
+double mult_vectors_double(const double *v1, const double *v2, int n){
+	int i;
+	double result = 0.0;
+	for(i = 0; i < n; i++){
+		result += (*(v1+i))*(*(v2+i));
+	}
+	return result;
+}
+
+double mult_vectors_int(const double *v1, const int *v2, int n){
 	int i;
 	double result = 0.0;
 	for(i = 0; i < n; i++){
@@ -30,7 +39,7 @@ double calc_Q(int* s, spmat* B, int n){
 	double q;
 	double *result = (double*)malloc(n*sizeof(double));
 	mult_vector_with_matrix(B, s, result);
-	q = 0.5*mult_vectors(result,s);
+	q = 0.5*mult_vectors_int(result, s, n);
 	free(result);
 	return q;
 }
@@ -41,14 +50,15 @@ int division_to_2(spmat* B, int* g, int n){
 	int *s, i, is_divisible;
 	double max_q, q;
 	int max_ind;
+	spmat *Bg;
 	is_divisible = 1;
 	eigenvector = (double*)malloc(n*sizeof(double));
 	s = (int*)malloc(n*sizeof(int));
-	spmat *Bg = (spmat*)malloc(sizeof(spmat));
+	Bg = spmat_allocate(n);;
 	calc_Bg(B, Bg, g, n);
 	calc_Bg_bar(Bg, n);
 	eigen_val = calc_B_eigen_pair(Bg, eigenvector, n);
-	if(eigen_val <= 0){//The group is indivisible
+	if(eigen_val <= 0){/*The group is indivisible*/
 		is_divisible = 0;
 	}
 	else{
@@ -61,7 +71,7 @@ int division_to_2(spmat* B, int* g, int n){
 			}
 		}
 	}
-	if(calc_Q(s, B, n) <= 0){//The group is indivisible
+	if(calc_Q(s, B, n) <= 0){/*The group is indivisible*/
 		is_divisible = 0;
 	}
 	else{
@@ -91,17 +101,19 @@ int division_to_2(spmat* B, int* g, int n){
 	return is_divisible;
 }
 
-void arry_to_list(node* list, int* array, int n){
-	node* curr_node, elem;
+node* arry_to_list(int* array, int n){
+	node *curr_node, *elem, *list;
 	int i, first;
 	first = 1;
+	list = (node*)malloc(sizeof(node));
 	for(i = 0; i < n; i++){
 		if(array[i] != 0){
 			elem = (node*)malloc(sizeof(node));
 			elem->val = i;
 			elem->next = NULL;
 			if(first){
-				curr_node = elem;
+				list = elem;
+				elem = curr_node;
 				first = 0;
 			}
 			else{
@@ -111,6 +123,7 @@ void arry_to_list(node* list, int* array, int n){
 			}
 		}
 	}
+	return list;
 }
 
 void list_to_array(node* list, int* array){
@@ -136,7 +149,7 @@ node* remove_group(list_of_lists* groups){
 	list_of_lists* elem_to_remove;
 	node *group = groups->node;
 	elem_to_remove = groups;
-	*(groups) = groups->next;
+	groups = groups->next;
 	free(elem_to_remove);
 	return group;
 }
@@ -150,10 +163,10 @@ int is_empty(list_of_lists* groups){
 	}
 }
 
-list_of_lists* devide_network(spmat* B, int n){
+list_of_lists* divide_network(spmat* B, int n){
 	int i, j, is_divisible, *g, *g1, *g2;
+	node *group;
 	/*int curr_ind_O, curr_ind_P;*/
-	int *g;
 	list_of_lists *groups, *non_divisible_groups;
 	groups = (list_of_lists*)malloc(sizeof(list_of_lists));
 	non_divisible_groups = (list_of_lists*)malloc(sizeof(list_of_lists));
@@ -162,25 +175,23 @@ list_of_lists* devide_network(spmat* B, int n){
 	for(i = 0; i < n; i++){
 		g[i] = 1;
 	}
-	node* group;
-	arry_to_list(group, g, n);
+	group = arry_to_list(g, n);
 	add_group(groups, group);
 	free(g);
 	free(group);
 	while(!is_empty(groups)){
 		/*remove a group from P and represent the group as an int array g*/
-		node *group = (node)malloc(sizeof(node));
-		remove_group(groups, group);
+		group = remove_group(groups);
 		g = (int*)calloc(n, sizeof(int));
 		list_to_array(group, g);
 		is_divisible = division_to_2(B, g, n);
 			if(!is_divisible){
 				/*add g to O*/
-				node* group = (node)malloc(sizeof(node));
-				arry_to_list(group, g, n);
 				add_group(non_divisible_groups, group);
+				free(group);
 			}
 			else{
+				node *group1, *group2;
 				g1 = (int*)calloc(n, sizeof(int));
 				g2 = (int*)calloc(n, sizeof(int));
 				for(j = 0; j < n; j++){
@@ -191,10 +202,8 @@ list_of_lists* devide_network(spmat* B, int n){
 						g2[j] = -1;
 					}
 				}
-				node* group1 = (node)malloc(sizeof(node));
-				node* group2 = (node)malloc(sizeof(node));
-				arry_to_list(group1, g1, n);
-				arry_to_list(group2, g2, n);
+				group1 = arry_to_list(g1, n);
+				group2 = arry_to_list(g2, n);
 				/*if one of the groups is empty or has only one element*/
 				if((group1 == NULL) || (group1->next == NULL)){ /*size of 0 or 1*/
 					add_group(non_divisible_groups, group1);/*add to O*/
@@ -208,21 +217,23 @@ list_of_lists* devide_network(spmat* B, int n){
 				else{
 					add_group(groups, group2);/*add to P*/
 				}
+				free(group1);
+				free(group2);
 			}
 	}
 	free(g);
 	return non_divisible_groups;
 }
 
-/* calculate Q: by definition */
+/* calculate Q: by definition
 double calculate_deltaQ(int* s, spmat* B){
 	double result, *temp=(double*)calloc(1,sizeof(B->n));
-	multMatrix(B,s,temp);
-	result=multVec(s,temp);
+	mult_vector_with_matrix(B,s,temp);
+	result = mult_vectors(temp, s, B->n);
 	return (result*0.5);
 
 
-}
+}*/
 
 /* initial array values to -1 */
 void indices_start(int* indices,int n){
@@ -244,59 +255,60 @@ int unmoved_start(int* unmoved,int n,int* s){
 }
 
 void modularity_maximization(spmat* BgHat , int* s){
-	double* score ,improve ;
-	double Q0,maxscore,maxImprove,deltaQ=0;
-	int n ,ng, i,j ,maxScoreVertex,maxImproveIndex;;
-	int* unmoved,indices;
-	n=BgHat->n;
+	double *score , *improve ;
+	double Q0 , maxscore, maxImprove, deltaQ;
+	int n ,ng, i, j , maxScoreVertex, maxImproveIndex;
+	int *unmoved, *indices;
+	n = BgHat->n;
+	deltaQ = 0;
 	unmoved=(int*)calloc(1,sizeof(n));
 	indices=(int*)calloc(1,sizeof(n));
 	score=(double*)calloc(1,sizeof(n));
 	improve=(double*)calloc(1,sizeof(n));
 	indices_start(indices,n);
-	ng=unmoved_start(unmoved,n,s);
-	while(deltaQ>=0){	/* main while according to line 31 of the alg'*/
+	ng = unmoved_start(unmoved,n,s);
+	while(deltaQ >= 0){	/* main while according to line 31 of the alg'*/
 	for (i = 0; i < ng; ++i) {	/* lines 3-20 alg4*/
-			Q0 = (calculate_deltaQ(s,BgHat)*2);
-			s[0]=-s[0];
-			score[0]=(calculate_deltaQ(s,BgHat)*2)-Q0;
-			maxscore=score[0];
-			maxScoreVertex=0;
-			s[0]=-s[0];
+			Q0 = (calc_Q(s, BgHat, n)*2);
+			s[0] = -s[0];
+			score[0] = (calc_Q(s, BgHat, n)*2) - Q0;
+			maxscore = score[0];
+			maxScoreVertex = 0;
+			s[0] = -s[0];
 
 			for (j = 1; j < n; ++j) {/*for lines 6-10 on alg4 */
 				if(unmoved[j]!=0){
-					s[j]=-s[j];
-					score[j]=(calculate_deltaQ(s,BgHat)*2)-Q0;
-					s[j]=-s[j];
-					if(score[j]>maxscore){
-						maxScoreVertex=j;
-						maxscore=score[j];
+					s[j] = -s[j];
+					score[j] = (calc_Q(s, BgHat, n)*2)-Q0;
+					s[j] = -s[j];
+					if(score[j] > maxscore){
+						maxScoreVertex = j;
+						maxscore = score[j];
 					}
 				}
 			}
-			s[maxScoreVertex]=-s[maxScoreVertex];
-			indices[i]=maxScoreVertex;
-			if(i==0){
-				improve[i]=score[maxScoreVertex];
-				maxImprove=improve[i];
-				maxImproveIndex=i;
+			s[maxScoreVertex] = -s[maxScoreVertex];
+			indices[i] = maxScoreVertex;
+			if(i == 0){
+				improve[i] = score[maxScoreVertex];
+				maxImprove = improve[i];
+				maxImproveIndex = i;
 			}else{
-				improve[i]=improve[i-1]+score[maxScoreVertex];
-				if(improve[i]>maxImprove){ /*maintain maximprove for next part*/
-					maxImprove=improve[i];
-					maxImproveIndex=i;
+				improve[i] = improve[i-1] + score[maxScoreVertex];
+				if(improve[i] > maxImprove){ /*maintain maximprove for next part*/
+					maxImprove = improve[i];
+					maxImproveIndex = i;
 				}
 			}
-			unmoved[maxScoreVertex]=0;
+			unmoved[maxScoreVertex] = 0;
 		}
-	for(i=ng-1;i>maxImproveIndex;--i){
-		s[indices[i]]=-s[indices[i]];
+	for(i = ng-1; i > maxImproveIndex; --i){
+		s[indices[i]] = -s[indices[i]];
 	}
-	if(maxImproveIndex==(ng-1)){
-		deltaQ=0;
+	if(maxImproveIndex == (ng-1)){
+		deltaQ = 0;
 	}else{
-		deltaQ=improve[maxImproveIndex];
+		deltaQ = improve[maxImproveIndex];
 		}
 	}
 }

@@ -1,7 +1,7 @@
 /*
  * B_matrix.h
  *
- *  Created on: 21 ×‘××•×’×³ 2020
+ *  Created on: 21 áàåâ× 2020
  *      Author: irist
  */
 
@@ -10,7 +10,7 @@
 
 spmat* create_B(spmat* A, int* ranks, int m, int size);
 
-void calc_Bg(spmat* B, int* g, int size);
+void calc_Bg(spmat* B, spmat* Bg, int* g, int size);
 
 double calc_fi(spmat* Bg, int i);
 

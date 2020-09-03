@@ -1,7 +1,7 @@
 /*
  * eigen_pair.c
  *
- *  Created on: 18 ×‘××•×’×³ 2020
+ *  Created on: 18 áàåâ× 2020
  *      Author: irist
  */
 #include "spmat.h"
@@ -68,10 +68,10 @@ void calc_eigen(spmat *matrix, double *currvector, double *nextvector, int n){
 double calc_eigen_val(spmat *matrix, double *eigenvector, int n){
 	double eigenval;
 	double numerator, denominator;
-	double *matrix_by_vec;
-	matrix_by_vec = mult_matrix_with_vector(matrix, eigenvector, matrix_by_vec);
-	numerator = mult_vectors(matrix_by_vec, eigenvector, n);
-	denominator = mult_vectors(eigenvector, eigenvector, n);
+	double *matrix_by_vec = (double*)calloc(n, sizeof(double));
+	mult_matrix_with_double_vector(matrix, eigenvector, matrix_by_vec);
+	numerator = mult_vectors_double(matrix_by_vec, eigenvector, n);
+	denominator = mult_vectors_double(eigenvector, eigenvector, n);
 	eigenval = numerator/denominator;
 	return eigenval;
 

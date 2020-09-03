@@ -1,7 +1,7 @@
 /*
  * spmat.h
  *
- *  Created on: 17 „С„Р„Х„Т„≥ 2020
+ *  Created on: 17 баев„ 2020
  *      Author: irist
  */
 
