@@ -36,7 +36,7 @@ spmat* spmat_allocate(int n){
 				matrix->free(matrix);
 				return NULL;
 		}
-	matrix->mult = &mult_matrix_with_vector;
+	matrix->mult = &mult_matrix_with_double_vector;
 	if(matrix->mult==NULL){
 				matrix->free(matrix);
 				return NULL;
@@ -96,7 +96,7 @@ void free_in_list(struct _spmat *A){
 }
 
 
-void mult_matrix_with_vector(const struct _spmat *A, const double *v, double *result){
+void mult_matrix_with_double_vector(const struct _spmat *A, const double *v, double *result){
 	int i, j, n;
 	double dotproduct;
 	linked_list *currlist;
@@ -113,8 +113,25 @@ void mult_matrix_with_vector(const struct _spmat *A, const double *v, double *re
 	}
 }
 
-void mult_vector_with_matrix(const struct _spmat *A, const double *v, double *result){
+void mult_matrix_with_int_vector(const struct _spmat *A, const int *v, double *result){
 	int i, j, n;
+	double dotproduct;
+	linked_list *currlist;
+	n = A->n;
+	for(i = 0 ; i < n; i++){
+		dotproduct = 0.0;
+		currlist = ((linked_list**)(A -> private))[i];
+		while(currlist != NULL){
+			j = currlist->col;
+			dotproduct += (double)(currlist->val * v[j]);
+			currlist = currlist->next;
+		}
+		result[i] = dotproduct;
+	}
+}
+
+void mult_vector_with_matrix(const struct _spmat *A, const int *v, double *result){
+	int i, n;
 	double dotproduct;
 	linked_list *currlist;
 	n = A->n;
@@ -162,21 +179,21 @@ void create_IC(spmat* i_matrix, int size, double c){
 	for(i = 0; i < size; i++){
 		row = (double*)calloc(size,sizeof(double));
 		row[i] = c;
-		add_row(i_matrix, row, i);
+		i_matrix->add_row(i_matrix, row, i);
 		free(row);
 	}
 }
 
 /*Calculate the shifted matrix C'*/
-void calc_shift(const struct _spmat *A, spmat *shifted_matrix){
+void calc_shift(struct _spmat* A, spmat* shifted_matrix){
 	int i, n;
 	double c = calc_norm_1(A);
 	linked_list *currlist1, *currlist2;
 	n = A->n;
-	shifted_matrix = create_IC(A, n, c);
+	create_IC(shifted_matrix, n, c);
 	for(i = 0; i < n; i++){
-		currlist1 = (double*)(shifted_matrix->private)[i];
-		currlist2 = (double*)(A->private)[i];
+		currlist1 = ((linked_list**)(shifted_matrix->private))[i];
+		currlist2 = ((linked_list**)(A->private))[i];
 		while(currlist1 != NULL){
 			currlist1->val = currlist1->val + currlist2->val;
 		}
