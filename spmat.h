@@ -50,14 +50,17 @@ void add_row_in_list(struct _spmat *A, const double *row, int i);
 
 void free_in_list(struct _spmat *A);
 
-void mult_matrix_with_vector(const struct _spmat *A, const double *v, double *result);
+void mult_matrix_with_double_vector(const struct _spmat *A, const double *v, double *result);
 
-void mult_vector_with_matrix(const struct _spmat *A, const double *v, double *result);
+/*void mult_matrix_with_int_vector(const struct _spmat *A, const int *v, double *result);*/
+
+void mult_vector_with_matrix(const struct _spmat *A, const int *v, double *result);
 
 void create_IC(spmat* i_matrix, int size, double c);
 
-void calc_shift(const struct _spmat *A, spmat *shifted_matrix);
+void calc_shift(struct _spmat *A, spmat *shifted_matrix);
 
+double calc_norm_1(const struct _spmat *A);
 
 
 
