@@ -1,10 +1,12 @@
 /*
  * cluster.c
  *
- *  Created on: 17 ×‘×�×•×’×³ 2020
  *      Author: irist
  */
 #include "spmat.h"
+#include "module_alg.h"
+#include "eigen_pair.h"
+#include "B_matrix.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
@@ -15,11 +17,13 @@
 
 
 spmat* read_mat(FILE *input, int* ranks, int size){
-	int i,k,temp,j;
+	int i,k,j;
 	int n;
 	double* row;
+	int * row_tmp;
 	spmat* A;
 	A = spmat_allocate(size);
+	printf("entered read_mat \n");
 	for(i = 0; i < size; i++){
 		n = fread(&k, sizeof(int), 1, input);
 		if(n != 1){
@@ -27,11 +31,17 @@ spmat* read_mat(FILE *input, int* ranks, int size){
 		}
 		ranks[i] = k;
 		row = (double*)calloc(k, sizeof(double));
-		n = fread(&row, sizeof(int), k, input);
+		row_tmp = (int*)calloc(k, sizeof(int));
+		n = fread(&row_tmp, sizeof(int), k, input);
 		if(n != k){
 			printf("Error in reading a row");
 		}
-		A->add_row(row);
+		for(j=0;j<k;j++){
+			row[j] = (double)row_tmp[j];
+		}
+		A->add_row(A, row, i);
+		free(row);
+		free(row_tmp);
 	}
 	return A;
 }
@@ -40,20 +50,20 @@ spmat* read_mat(FILE *input, int* ranks, int size){
 int calc_M(int* ranks,int size){
 	int i, m=0;
 	for(i=0; i< size; i++){
-		m+= ranks[i];
+		m += ranks[i];
 	}
 	return m;
 }
 
 int calc_set_size(node* set){
-	node curr = set;
+	node *curr = set;
 	int res =0;
 	if(set == NULL){
 		return res;
 	}
-	while(curr!= NULL){
+	while(curr != NULL){
 		res++;
-		curr = curr.next;
+		curr = curr->next;
 	}
 	free(curr);
 	return res;
@@ -61,9 +71,9 @@ int calc_set_size(node* set){
 
 int calc_num_sets(list_of_lists* sets){
 	int res;
-	list_of_lists*curr =  sets;
+	list_of_lists *curr =  sets;
 	res=0;
-	while(curr!=NULL){
+	while(curr != NULL){
 		curr = curr->next;
 	}
 	free(curr);
@@ -82,10 +92,10 @@ int compare( const void* a, const void* b)
 
 void list_to_arr(int* arr, node* set, int size){
 	int i;
-	node curr = set;
+	node *curr = set;
 	for(i=0; i<size; i++){
-		arr[i] = curr.val;
-		curr = curr.next;
+		arr[i] = curr->val;
+		curr = curr->next;
 	}
 	qsort(arr,size, sizeof(int), compare);
 }
@@ -95,23 +105,32 @@ int main(int argc, char* argv[]){
 	FILE *input, *output;
 	spmat *A, *B;
 	int *ranks;
-	int size,m, n,sets_num,temp,i,asserter;
-	list_of_lists* sets;
+	int size, m, n, sets_num, temp, asserter;
+	list_of_lists *sets;
+	printf("start running the program \n");
+	if(argc != 3){
+		printf("More/Less then 2 parameters have been given");
+		return 1;
+	}
+
 	input = fopen(argv[1], "r");
 	if(input == NULL){
 		printf("Error in reading the file");
 		return 1;
 	}
+	printf("created input \n");
 	n = fread(&size, sizeof(int), 1, input);
 	if(n != 1){
 		printf("Error in reading the size of the matrix");
 	}
+	printf("size=  %d \n" , size);
 	ranks = (int*)calloc(size, sizeof(int));
 	if(ranks == NULL){
 		printf("Error in allocation of memory");
 		return 1;
 	}
 	A = read_mat(input,ranks,size);
+	printf("read matrix A \n");
 	fclose(input);
 	m = calc_M(ranks,size);
 	B = create_B(A, ranks, m, size);
@@ -123,18 +142,19 @@ int main(int argc, char* argv[]){
 		return 1;
 	}
 	while(sets!=NULL){
+		int *set;
 		temp = calc_set_size(sets->node);
 		asserter = fwrite(&temp, sizeof(int),1,output);
 					if(asserter!=1){
 						return 1;
 					}
-		int* set = (int*)calloc(temp, sizeof(int));
-		list_to_arr(set, sets[i], temp);
+		set = (int*)calloc(temp, sizeof(int));
+		list_to_arr(set, sets->node, temp);
 		asserter = fwrite(&set, sizeof(int),temp,output);
 		if(asserter!=temp){
 			return 1;
 		}
-		sets=sets->next;
+		sets = sets->next;
 		free(set);
 	}
 	free(ranks);
