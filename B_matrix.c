@@ -1,13 +1,14 @@
 /*
  * B_matrix.c
  *
- *  Created on: 18 ×‘××•×’×³ 2020
+ *  Created on: 18 áàåâ× 2020
  *      Author: irist
  */
 
 #include "spmat.h"
 #include "module_alg.h"
 #include "eigen_pair.h"
+#include "B_matrix.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
@@ -22,8 +23,8 @@ spmat* create_B(spmat* A, int* ranks, int m, int size){
 	int i,j,col;
 	B = spmat_allocate(size);
 	for(i=0; i<size; i++){
+		linked_list *curr = ((linked_list**)(A->private))[i];
 		row = (double*)calloc(size, sizeof(double));
-		linked_list *curr = (linked_list*)(A->private[i]);
 		col = curr->col;
 		for(j=0; j< size; j++){
 			if(j==col){
@@ -34,7 +35,7 @@ spmat* create_B(spmat* A, int* ranks, int m, int size){
 				row[j] = 0 - ((ranks[j]*ranks[i])/m);
 			}
 		}
-		B->add_row(row);
+		B->add_row(B, row, i);
 		free(row);
 	}
 	return B;
@@ -42,26 +43,26 @@ spmat* create_B(spmat* A, int* ranks, int m, int size){
 
 
 void copy_matrix(spmat* A, spmat* B, int n){
-	int i, j;
+	int i;
 	double *row;
 	linked_list *curr;
 	B = spmat_allocate(n);
 	for(i = 0; i < n; i++){
-		curr = (linked_list*)(A->private[i]);
+		curr = ((linked_list**)(A->private))[i];
 		row = (double*)malloc(n*sizeof(double));
 		while(curr != NULL){
 			row[curr->col] = curr->val;
 		}
-		B->add_row(row);
+		B->add_row(B, row, i);
 		free(row);
 	}
 }
 
 void calc_Bg(spmat* B, spmat* Bg, int* g, int size){
 	int i,j;
-	linked_list *curr, *arr;
+	linked_list *curr, **arr;
 	copy_matrix(B, Bg, size);
-	arr = (linked_list*)(Bg->private);
+	arr = (linked_list**)(Bg->private);
 	for(i = 0; i < size; i++){
 		if(g[i] == 0){
 			arr[i] = NULL;
@@ -70,7 +71,7 @@ void calc_Bg(spmat* B, spmat* Bg, int* g, int size){
 			curr = arr[i];
 			while((curr != NULL) && (curr->col < i)){
 				if(curr->next->col == i){
-					linked_list temp = curr->next;
+					linked_list *temp = curr->next;
 					curr->next = curr->next->next;
 					free(temp);
 				}
@@ -81,7 +82,7 @@ void calc_Bg(spmat* B, spmat* Bg, int* g, int size){
 
 double calc_fi(spmat* Bg, int i){
 	double sum;
-	linked_list *list = (double*)(Bg->private[i]);
+	linked_list *list = ((linked_list**)(Bg->private))[i];
 	sum = 0;
 	while(list != NULL){
 		sum += list->val;
@@ -95,7 +96,7 @@ void calc_Bg_bar(spmat* Bg, int size){
 	linked_list *curr;
 	for(i = 0; i < size; i++){
 		int fi = calc_fi(Bg, i);
-		curr = (linked_list*)(Bg->private[i]);
+		curr = ((linked_list**)(Bg->private))[i];
 		while((curr != NULL) && (curr->col <= i)){
 			if(curr->col == i){
 				curr->val = curr->val - fi;

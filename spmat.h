@@ -8,8 +8,6 @@
 #ifndef SPMAT_H_
 #define SPMAT_H_
 
-#ifndef _SPMAT_H
-#define _SPMAT_H
 
 typedef struct _spmat {
 	/* Matrix size (n*n) */
@@ -67,6 +65,6 @@ double calc_norm_1(const struct _spmat *A);
 
 /*spmat* create_B(spmat* A, int* ranks, int m, int size);*/
 
-#endif
+
 
 #endif /* SPMAT_H_ */

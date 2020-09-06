@@ -160,7 +160,12 @@ double calc_norm_1(const struct _spmat *A){
 			currlist =  ((linked_list**)(A -> private))[i];
 			while((currlist != NULL) && (currlist->col <= j)){
 				if(currlist->col == j){
-					colsum += abs(currlist->val);
+					if((currlist->val) < 0){
+						colsum += -(currlist->val);
+					}
+					else{
+						colsum += (currlist->val);
+					}
 				}
 				currlist = currlist->next;
 			}

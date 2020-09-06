@@ -15,30 +15,52 @@
 #include <math.h>
 #include <string.h>
 
+void forceStop(const char* func,const int line){
+	printf("\n ~ forced to stop in %s, line %d", func, line);
+	exit(EXIT_SUCCESS);
+}
 
 spmat* read_mat(FILE *input, int* ranks, int size){
 	int i,k,j;
 	int n;
-	double* row;
-	int * row_tmp;
-	spmat* A;
+	double *row;
+	int *row_tmp;
+	spmat *A;
+	char *func = "red_mat";
 	A = spmat_allocate(size);
 	printf("entered read_mat \n");
 	for(i = 0; i < size; i++){
 		n = fread(&k, sizeof(int), 1, input);
 		if(n != 1){
-			printf("Couldn't open the file");
+			printf("Couldn't read the %d", i);
 		}
 		ranks[i] = k;
 		row = (double*)calloc(k, sizeof(double));
+		if(row == NULL){
+			printf("Couldn't allocate memory");
+			forceStop(func, 41);
+		}
 		row_tmp = (int*)calloc(k, sizeof(int));
+		if(row_tmp == NULL){
+			printf("Couldn't allocate memory");
+			forceStop(func, 46);
+		}
 		n = fread(&row_tmp, sizeof(int), k, input);
 		if(n != k){
 			printf("Error in reading a row");
 		}
-		for(j=0;j<k;j++){
-			row[j] = (double)row_tmp[j];
+		if(i == 1){
+			forceStop(func, 53);
 		}
+		for(j = 0; j < k; j++){
+			/*if(j == 0){
+				forceStop(func, 54);
+			}*/
+			forceStop(func, 59);
+			row[j] = row_tmp[j];
+			forceStop(func, 57);
+		}
+		forceStop(func, 47);
 		A->add_row(A, row, i);
 		free(row);
 		free(row_tmp);
@@ -107,12 +129,12 @@ int main(int argc, char* argv[]){
 	int *ranks;
 	int size, m, n, sets_num, temp, asserter;
 	list_of_lists *sets;
+	char *func = "main";
 	printf("start running the program \n");
 	if(argc != 3){
 		printf("More/Less then 2 parameters have been given");
 		return 1;
 	}
-
 	input = fopen(argv[1], "r");
 	if(input == NULL){
 		printf("Error in reading the file");
@@ -130,12 +152,17 @@ int main(int argc, char* argv[]){
 		return 1;
 	}
 	A = read_mat(input,ranks,size);
+	forceStop(func, 138);
 	printf("read matrix A \n");
 	fclose(input);
 	m = calc_M(ranks,size);
+	forceStop(func, 142);
 	B = create_B(A, ranks, m, size);
+	forceStop(func, 144);
 	sets = divide_network(B,size);
+	forceStop(func, 146);
 	sets_num = calc_num_sets(sets);
+	forceStop(func, 148);
 	output = fopen(argv[2], "w");
 	temp = fwrite(&sets_num, sizeof(int),1,output);/*write num of sets*/
 	if(temp!=1){
