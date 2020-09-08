@@ -44,7 +44,7 @@ double calc_Q(int* s, spmat* B, int n){
 	return q;
 }
 
-int division_to_2(spmat* B, int* g, int n){
+int division_to_2(spmat* A, int* g, int n, int* ranks, int m){
 	double eigen_val;
 	double *eigenvector;
 	int *s, i, is_divisible;
@@ -54,8 +54,8 @@ int division_to_2(spmat* B, int* g, int n){
 	is_divisible = 1;
 	eigenvector = (double*)malloc(n*sizeof(double));
 	s = (int*)malloc(n*sizeof(int));
-	Bg = spmat_allocate(n);;
-	calc_Bg(B, Bg, g, n);
+	Bg = spmat_allocate(n);
+	calc_Bg(A, Bg, g, n, ranks, m);
 	calc_Bg_bar(Bg, n);
 	eigen_val = calc_B_eigen_pair(Bg, eigenvector, n);
 	if(eigen_val <= 0){/*The group is indivisible*/
@@ -71,7 +71,7 @@ int division_to_2(spmat* B, int* g, int n){
 			}
 		}
 	}
-	if(calc_Q(s, B, n) <= 0){/*The group is indivisible*/
+	if(calc_Q(s, Bg, n) <= 0){/*The group is indivisible*/
 		is_divisible = 0;
 	}
 	else{
@@ -86,7 +86,7 @@ int division_to_2(spmat* B, int* g, int n){
 	for (i = 0; i < n; i++){
 		if(g[i] == -1){
 			g[i] = 1;
-			q = calc_Q(g, B, n);
+			q = calc_Q(g, Bg, n);
 			if(q > max_q){
 				max_q = q;
 				max_ind = i;
@@ -163,7 +163,7 @@ int is_empty(list_of_lists* groups){
 	}
 }
 
-list_of_lists* divide_network(spmat* B, int n){
+list_of_lists* divide_network(spmat* A, int n, int m, int* ranks){
 	int i, j, is_divisible, *g, *g1, *g2;
 	node *group;
 	/*int curr_ind_O, curr_ind_P;*/
@@ -184,7 +184,7 @@ list_of_lists* divide_network(spmat* B, int n){
 		group = remove_group(groups);
 		g = (int*)calloc(n, sizeof(int));
 		list_to_array(group, g);
-		is_divisible = division_to_2(B, g, n);
+		is_divisible = division_to_2(A, g, n, ranks, m);
 			if(!is_divisible){
 				/*add g to O*/
 				add_group(non_divisible_groups, group);

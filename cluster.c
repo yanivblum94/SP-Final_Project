@@ -34,7 +34,7 @@ spmat* read_mat(FILE *input, int* ranks, int size){
 		if(n != 1){
 			printf("Couldn't read the %d", i);
 		}
-		printf("k of ith row  %d %d \n" , k, i );
+		printf("k of ith row %d %d /n" , k, i);
 		ranks[i] = k;
 		if(k>0){
 		row = (double*)calloc(k, sizeof(double));
@@ -51,12 +51,12 @@ spmat* read_mat(FILE *input, int* ranks, int size){
 		if(n != k){
 			printf("Error in reading a row");
 		}
-		/*if(i == 1){
-			forceStop(func, 53);
-		}*/
+		if(i == 1){
+			/*forceStop(func, 53);*/
+		}
 		for(j = 0; j < k; j++){
 			/*forceStop(func, 57);*/
-			/*printf("row[j] = %f", row[j]);*/
+			printf("row[j] = %f", row[j]);
 			/*forceStop(func, 59);*/
 			printf("row_tmp[j] = %d", row_tmp[j]);
 			/*forceStop(func, 59);*/
@@ -133,7 +133,7 @@ void list_to_arr(int* arr, node* set, int size){
 
 int main(int argc, char* argv[]){
 	FILE *input, *output;
-	spmat *A, *B;
+	spmat *A;
 	int *ranks;
 	int size, m, n, sets_num, temp, asserter;
 	list_of_lists *sets;
@@ -164,10 +164,9 @@ int main(int argc, char* argv[]){
 	printf("read matrix A \n");
 	fclose(input);
 	m = calc_M(ranks,size);
-	forceStop(func, 142);
-	B = create_B(A, ranks, m, size);
-	forceStop(func, 144);
-	sets = divide_network(B,size);
+	/*forceStop(func, 142);
+	forceStop(func, 144);*/
+	sets = divide_network(A, size, m, ranks);
 	forceStop(func, 146);
 	sets_num = calc_num_sets(sets);
 	forceStop(func, 148);
@@ -196,7 +195,6 @@ int main(int argc, char* argv[]){
 	free(sets);
 	fclose(output);
 	free_in_list(A);
-	free_in_list(B);
 	return 0;
 }
 

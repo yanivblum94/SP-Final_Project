@@ -17,7 +17,7 @@
 #include <math.h>
 #include <string.h>
 
-spmat* create_B(spmat* A, int* ranks, int m, int size){
+/*spmat* create_B(spmat* A, int* ranks, int m, int size){
 	spmat* B;
 	double* row;
 	int i,j,col;
@@ -39,10 +39,10 @@ spmat* create_B(spmat* A, int* ranks, int m, int size){
 		free(row);
 	}
 	return B;
-}
+}*/
 
 
-void copy_matrix(spmat* A, spmat* B, int n){
+/*void copy_matrix(spmat* A, spmat* B, int n){
 	int i;
 	double *row;
 	linked_list *curr;
@@ -56,29 +56,30 @@ void copy_matrix(spmat* A, spmat* B, int n){
 		B->add_row(B, row, i);
 		free(row);
 	}
-}
+}*/
 
-void calc_Bg(spmat* B, spmat* Bg, int* g, int size){
-	int i,j;
-	linked_list *curr, **arr;
-	copy_matrix(B, Bg, size);
-	arr = (linked_list**)(Bg->private);
+void calc_Bg(spmat* A, spmat* Bg, int* g, int size, int* ranks, int m){
+	int i, col;
+	linked_list *curr;
+	double *row;
 	for(i = 0; i < size; i++){
-		if(g[i] == 0){
-			arr[i] = NULL;
-		}
-		for(j = 0; j < size; j++){
-			curr = arr[i];
-			while((curr != NULL) && (curr->col < i)){
-				if(curr->next->col == i){
-					linked_list *temp = curr->next;
-					curr->next = curr->next->next;
-					free(temp);
+		if(g[i] != 0){
+			curr = ((linked_list**)(A->private))[i];
+			row = (double*)calloc(size, sizeof(double));
+			while(curr != NULL){
+				col = curr->col;
+				if(g[col] != 0){
+					row[col] = curr->val - ((ranks[col]*ranks[i])/m);
 				}
+				curr = curr->next;
 			}
+			Bg->add_row(Bg, row, i);
+			free(row);
 		}
 	}
+	free(curr);
 }
+
 
 double calc_fi(spmat* Bg, int i){
 	double sum;

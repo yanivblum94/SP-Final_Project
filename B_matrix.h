@@ -8,9 +8,9 @@
 #ifndef B_MATRIX_H_
 #define B_MATRIX_H_
 
-spmat* create_B(spmat* A, int* ranks, int m, int size);
+/*spmat* create_B(spmat* A, int* ranks, int m, int size);*/
 
-void calc_Bg(spmat* B, spmat* Bg, int* g, int size);
+void calc_Bg(spmat* A, spmat* Bg, int* g, int size, int* ranks, int m);
 
 double calc_fi(spmat* Bg, int i);
 
