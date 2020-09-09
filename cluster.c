@@ -184,7 +184,7 @@ int main(int argc, char* argv[]){
 					}
 		set = (int*)calloc(temp, sizeof(int));
 		list_to_arr(set, sets->node, temp);
-		asserter = fwrite(&set, sizeof(int),temp,output);
+		asserter = fwrite(set, sizeof(int),temp,output);
 		if(asserter!=temp){
 			return 1;
 		}
