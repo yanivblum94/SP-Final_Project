@@ -51,7 +51,7 @@ int unmoved_start(int* unmoved,int n,int* s);
 
 void modularity_maximization(matrix* BgHat , int* s);
 
-list_of_lists* divide_network(spmat* A, int size, int* ranks, double* ranks_m, double norm);
+list_of_lists* divide_network(spmat* A, int size, int* ranks, double* ranks_m);
 
 node* remove_group(list_of_lists* groups);
 

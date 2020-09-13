@@ -29,7 +29,7 @@ void read_mat(spmat* A, FILE *input, int* ranks, int size){
 		if(n != 1){
 			printf("Couldn't read the %d", i);
 		}
-		printf("k of ith row %d %d \n" , k, i);
+		/*printf("k of ith row %d %d \n" , k, i);*/
 		ranks[i] = k;
 		if(k>0){
 		row = (double*)calloc(k, sizeof(double));
@@ -47,7 +47,7 @@ void read_mat(spmat* A, FILE *input, int* ranks, int size){
 			printf("Error in reading a row");
 		}
 		for(j = 0; j < k; j++){
-			printf("row_tmp[j] = %d  \n", row_tmp[j]);
+			/*printf("row_tmp[j] = %d  \n", row_tmp[j]);*/
 			row[j] = (double) row_tmp[j];
 		}
 		A->add_row(A, row, i, k);
@@ -143,7 +143,7 @@ int main(int argc, char* argv[]){
 	FILE *input, *output;
 	spmat *A;
 	int *ranks;
-	double *ranks_m, norm;
+	double *ranks_m;
 	int size, m, n, sets_num, temp, asserter;
 	list_of_lists *sets;
 	char *func = "main";
@@ -176,9 +176,8 @@ int main(int argc, char* argv[]){
 	/*print_mat(A);*/
 	m = calc_M(ranks,size);
 	ranks_m = calc_ranks_m(ranks, m, size);
-	norm = calc_norm_1_A(A);
-	sets = divide_network(A, size, ranks, ranks_m, norm);
-	forceStop(func, 178);
+	sets = divide_network(A, size, ranks, ranks_m);
+	forceStop(func, 180);
 	sets_num = calc_num_sets(sets);
 	forceStop(func, 148);
 	output = fopen(argv[2], "w");

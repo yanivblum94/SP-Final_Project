@@ -128,12 +128,12 @@ int is_empty(list_of_lists* groups){
 	}
 }
 
-list_of_lists* divide_network(spmat* A, int size, int* ranks, double* ranks_m, double norm){
+list_of_lists* divide_network(spmat* A, int size, int* ranks, double* ranks_m){
 	int i, j, is_divisible, *g, *g1, *g2, *s;
 	node *group;
 	matrix *Bg;
 	list_of_lists *groups, *non_divisible_groups;
-	/*char *func = "divide_network";*/
+	char *func = "divide_network";
 	groups = (list_of_lists*)calloc(1, sizeof(list_of_lists));
 	non_divisible_groups = (list_of_lists*)malloc(sizeof(list_of_lists));
 	g = (int*)calloc(size, sizeof(int));
@@ -141,10 +141,15 @@ list_of_lists* divide_network(spmat* A, int size, int* ranks, double* ranks_m, d
 	for(i = 0; i < size; i++){
 		g[i] = 1;
 	}
-	Bg = allocate_matrix(A, size, norm, ranks, ranks_m, g);
+	Bg = allocate_matrix(A, size, ranks, ranks_m, g);
+	Bg->c = calc_norm_1(Bg);
+	printf("norm is: %f \n" , Bg->c);
+	forceStop(func, 147);
 	group = arry_to_list(g, size);
-	/*forceStop(func, 138);*/
+	printf("size in matrix  %d \n", Bg->size);
 	add_group(groups, group);
+	printf("added 1st group\n");
+	forceStop(func, 150);
 	free(g);
 	free(group);
 	while(!is_empty(groups)){
@@ -153,9 +158,9 @@ list_of_lists* divide_network(spmat* A, int size, int* ranks, double* ranks_m, d
 		g = (int*)calloc(size, sizeof(int));
 		list_to_array(group, g);
 		Bg->g = g;
-		Bg->c = calc_norm_1(Bg);
 		s = (int*)calloc(size, sizeof(int));
 		is_divisible = division_to_2(Bg, s);
+		forceStop(func, 160);
 			if(!is_divisible){
 				/*add g to O*/
 				add_group(non_divisible_groups, group);
@@ -191,8 +196,10 @@ list_of_lists* divide_network(spmat* A, int size, int* ranks, double* ranks_m, d
 				free(group1);
 				free(group2);
 			}
+			forceStop(func, 195);
 	}
 	free(s);
+	forceStop(func, 196);
 	return non_divisible_groups;
 }
 
