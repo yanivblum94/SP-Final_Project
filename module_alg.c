@@ -93,13 +93,21 @@ void list_to_array(node* list, int* array){
 
 void add_group(list_of_lists* groups, node* group){
 	list_of_lists *new_group;
-	while(groups->next != NULL){
-		groups = groups->next;
+	if(groups->node == NULL){
+		new_group = (list_of_lists*)malloc(sizeof(list_of_lists));
+		new_group->node = group;
+		groups = new_group;
 	}
-	new_group = (list_of_lists*)malloc(sizeof(list_of_lists));
-	new_group->node = group;
-	new_group->next = NULL;
-	groups->next = new_group;
+	else{
+		while(groups->next != NULL){
+				groups = groups->next;
+			}
+			new_group = (list_of_lists*)malloc(sizeof(list_of_lists));
+			new_group->node = group;
+			new_group->next = NULL;
+			groups->next = new_group;
+	}
+
 }
 
 node* remove_group(list_of_lists* groups){
@@ -120,6 +128,74 @@ int is_empty(list_of_lists* groups){
 	}
 }
 
+list_of_lists* divide_network(spmat* A, int size, int* ranks, double* ranks_m, double norm){
+	int i, j, is_divisible, *g, *g1, *g2, *s;
+	node *group;
+	matrix *Bg;
+	list_of_lists *groups, *non_divisible_groups;
+	char *func = "divide_network";
+	groups = (list_of_lists*)calloc(1, sizeof(list_of_lists));
+	non_divisible_groups = (list_of_lists*)malloc(sizeof(list_of_lists));
+	g = (int*)calloc(size, sizeof(int));
+	/*create the first group*/
+	for(i = 0; i < size; i++){
+		g[i] = 1;
+	}
+	Bg = allocate_matrix(A, size, norm, ranks, ranks_m, g);
+	group = arry_to_list(g, size);
+	/*forceStop(func, 138);*/
+	add_group(groups, group);
+	forceStop(func, 140);
+	free(g);
+	free(group);
+	while(!is_empty(groups)){
+		/*remove a group from P and represent the group as an int array g*/
+		group = remove_group(groups);
+		g = (int*)calloc(size, sizeof(int));
+		list_to_array(group, g);
+		Bg->g = g;
+		Bg->c = calc_norm_1(Bg);
+		s = (int*)calloc(size, sizeof(int));
+		is_divisible = division_to_2(Bg, s);
+			if(!is_divisible){
+				/*add g to O*/
+				add_group(non_divisible_groups, group);
+				free(group);
+			}
+			else{
+				node *group1, *group2;
+				g1 = (int*)calloc(size, sizeof(int));
+				g2 = (int*)calloc(size, sizeof(int));
+				for(j = 0; j < size; j++){
+					if(s[j] == 1){
+						g1[j] = 1;
+					}
+					else if(s[j] == -1){
+						g2[j] = -1;
+					}
+				}
+				group1 = arry_to_list(g1, size);
+				group2 = arry_to_list(g2, size);
+				/*if one of the groups is empty or has only one element*/
+				if((group1 == NULL) || (group1->next == NULL)){ /*size of 0 or 1*/
+					add_group(non_divisible_groups, group1);/*add to O*/
+				}
+				else{
+					add_group(groups, group1);/*add to P*/
+				}
+				if((group2 == NULL) || (group2->next == NULL)){ /*size of 0 or 1*/
+					add_group(non_divisible_groups, group2);/*add to O*/
+				}
+				else{
+					add_group(groups, group2);/*add to P*/
+				}
+				free(group1);
+				free(group2);
+			}
+	}
+	free(s);
+	return non_divisible_groups;
+}
 
 /* calculate Q: by definition
 double calculate_deltaQ(int* s, spmat* B){
@@ -220,72 +296,5 @@ double calc_B_eigen_pair(matrix* B, double *eigenvector, int n){
 	free(currvector);
 	return eigen_val;
 
-}
-
-list_of_lists* divide_network(spmat* A, int size, int* ranks, double* ranks_m, double norm){
-	int i, j, is_divisible, *g, *g1, *g2, *s;
-	node *group;
-	matrix *Bg;
-	list_of_lists *groups, *non_divisible_groups;
-	/*char *func = "divide_network";*/
-	groups = (list_of_lists*)malloc(sizeof(list_of_lists));
-	non_divisible_groups = (list_of_lists*)malloc(sizeof(list_of_lists));
-	g = (int*)calloc(size, sizeof(int));
-	/*create the first group*/
-	for(i = 0; i < size; i++){
-		g[i] = 1;
-	}
-	Bg = allocate_matrix(A, size, norm, ranks, ranks_m, g);
-	group = arry_to_list(g, size);
-	add_group(groups, group);
-	free(g);
-	free(group);
-	while(!is_empty(groups)){
-		/*remove a group from P and represent the group as an int array g*/
-		group = remove_group(groups);
-		g = (int*)calloc(size, sizeof(int));
-		list_to_array(group, g);
-		Bg->g = g;
-		Bg->c = calc_norm_1(Bg);
-		s = (int*)calloc(size, sizeof(int));
-		is_divisible = division_to_2(Bg, s);
-			if(!is_divisible){
-				/*add g to O*/
-				add_group(non_divisible_groups, group);
-				free(group);
-			}
-			else{
-				node *group1, *group2;
-				g1 = (int*)calloc(size, sizeof(int));
-				g2 = (int*)calloc(size, sizeof(int));
-				for(j = 0; j < size; j++){
-					if(s[j] == 1){
-						g1[j] = 1;
-					}
-					else if(s[j] == -1){
-						g2[j] = -1;
-					}
-				}
-				group1 = arry_to_list(g1, size);
-				group2 = arry_to_list(g2, size);
-				/*if one of the groups is empty or has only one element*/
-				if((group1 == NULL) || (group1->next == NULL)){ /*size of 0 or 1*/
-					add_group(non_divisible_groups, group1);/*add to O*/
-				}
-				else{
-					add_group(groups, group1);/*add to P*/
-				}
-				if((group2 == NULL) || (group2->next == NULL)){ /*size of 0 or 1*/
-					add_group(non_divisible_groups, group2);/*add to O*/
-				}
-				else{
-					add_group(groups, group2);/*add to P*/
-				}
-				free(group1);
-				free(group2);
-			}
-	}
-	free(s);
-	return non_divisible_groups;
 }
 

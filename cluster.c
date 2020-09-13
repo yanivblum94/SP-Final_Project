@@ -29,6 +29,7 @@ void read_mat(spmat* A, FILE *input, int* ranks, int size){
 		if(n != 1){
 			printf("Couldn't read the %d", i);
 		}
+		printf("k of ith row %d %d \n" , k, i);
 		ranks[i] = k;
 		if(k>0){
 		row = (double*)calloc(k, sizeof(double));
@@ -46,6 +47,7 @@ void read_mat(spmat* A, FILE *input, int* ranks, int size){
 			printf("Error in reading a row");
 		}
 		for(j = 0; j < k; j++){
+			printf("row_tmp[j] = %d  \n", row_tmp[j]);
 			row[j] = (double) row_tmp[j];
 		}
 		A->add_row(A, row, i, k);
@@ -171,15 +173,10 @@ int main(int argc, char* argv[]){
 	printf("read matrix A \n");
 	printf("matrix A size:  %d \n", A->n);
 	fclose(input);
-	print_mat(A);
+	/*print_mat(A);*/
 	m = calc_M(ranks,size);
-	if(m==0){
-		printf("m=0 - error!");
-		return 1;
-	}
 	ranks_m = calc_ranks_m(ranks, m, size);
 	norm = calc_norm_1_A(A);
-	/*forceStop(func, 176);*/
 	sets = divide_network(A, size, ranks, ranks_m, norm);
 	forceStop(func, 178);
 	sets_num = calc_num_sets(sets);

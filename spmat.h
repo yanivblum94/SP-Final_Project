@@ -1,9 +1,4 @@
-/*
- * spmat.h
- *
- *  Created on: 17 баев„ 2020
- *      Author: irist
- */
+
 
 #ifndef SPMAT_H_
 #define SPMAT_H_

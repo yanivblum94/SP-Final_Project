@@ -1,9 +1,4 @@
-/*
- * spmat.c
- *
- *  Created on: 17 баев„ 2020
- *      Author: irist
- */
+
 #include "spmat.h"
 #include <stdio.h>
 #include <stdlib.h>
