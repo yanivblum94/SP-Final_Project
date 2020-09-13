@@ -17,21 +17,19 @@
 #include <string.h>
 
 
-spmat* read_mat(FILE *input, int* ranks, int size){
+void read_mat(spmat* A, FILE *input, int* ranks, int size){
 	int i,k,j;
 	int n;
 	double *row;
 	int *row_tmp;
-	spmat *A;
 	char *func = "red_mat";
-	A = spmat_allocate(size);
 	printf("entered read_mat \n");
 	for(i = 0; i < size; i++){
 		n = fread(&k, sizeof(int), 1, input);
 		if(n != 1){
 			printf("Couldn't read the %d", i);
 		}
-		printf("k of ith row %d %d /n" , k, i);
+		printf("k of ith row %d %d \n" , k, i);
 		ranks[i] = k;
 		if(k>0){
 		row = (double*)calloc(k, sizeof(double));
@@ -48,29 +46,32 @@ spmat* read_mat(FILE *input, int* ranks, int size){
 		if(n != k){
 			printf("Error in reading a row");
 		}
-		if(i == 1){
-			/*forceStop(func, 53);*/
-		}
 		for(j = 0; j < k; j++){
-			/*forceStop(func, 57);*/
-			printf("row[j] = %f", row[j]);
-			/*forceStop(func, 59);*/
-			printf("row_tmp[j] = %d", row_tmp[j]);
-			/*forceStop(func, 59);*/
-			/*if(j == 0){
-				forceStop(func, 54);
-			}*/
-			/*forceStop(func, 59);*/
+			printf("row_tmp[j] = %d  \n", row_tmp[j]);
 			row[j] = (double) row_tmp[j];
-			/*forceStop(func, 57);*/
 		}
-		/*forceStop(func, 47);*/
-		A->add_row(A, row, i);
+		A->add_row(A, row, i, k);
 		free(row);
 		free(row_tmp);
 	}
 	}
-	return A;
+}
+
+void print_mat(spmat* A){
+	int i;
+	linked_list *currlist;
+	printf("entered print_mat \n");
+	for(i=0; i<A->n; i++){
+		printf("row:  %d ", i);
+		currlist = ((linked_list**)(A->private))[i];
+		while(currlist != NULL){
+			printf("  col:  %d" ,  currlist->col);
+			printf("  val:  %f" ,  currlist->val);
+			currlist = currlist->next;
+		}
+		printf("\n");
+	}
+
 }
 
 
@@ -167,14 +168,18 @@ int main(int argc, char* argv[]){
 		printf("Error in allocation of memory");
 		return 1;
 	}
-	A = read_mat(input,ranks,size);
+	A = spmat_allocate(size);
+	read_mat(A,input,ranks,size);
 	printf("read matrix A \n");
+	printf("matrix A size:  %d \n", A->n);
 	fclose(input);
+	print_mat(A);
 	m = calc_M(ranks,size);
 	ranks_m = calc_ranks_m(ranks, m, size);
 	norm = calc_norm_1_A(A);
+	forceStop(func, 176);
 	sets = divide_network(A, size, ranks, ranks_m, norm);
-	forceStop(func, 168);
+	forceStop(func, 178);
 	sets_num = calc_num_sets(sets);
 	forceStop(func, 148);
 	output = fopen(argv[2], "w");

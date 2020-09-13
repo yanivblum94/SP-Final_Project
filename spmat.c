@@ -44,25 +44,26 @@ spmat* spmat_allocate(int n){
 				matrix->free(matrix);
 				return NULL;
 		}
+	matrix->n = n;
 	return matrix;
 
 }
 
 
-void add_row_in_list(struct _spmat *A, const double *row, int i){
+void add_row_in_list(struct _spmat *A, const double *row, int i, int k){
 	int j,flag;
 	linked_list *elem, *curr;
 	flag =1;
 	((linked_list**)(A->private))[i] = NULL;
-	for(j = 0; j < A->n; j++){
+	for(j = 0; j < k; j++){
 		if(row[j] != 0.0){
 			elem = (linked_list*)malloc(sizeof(linked_list));
 			if(elem==NULL){
 				A->free(A);
 				return;
 			}
-			elem->val = row[j];
-			elem->col = j;
+			elem->val = 1.0;
+			elem->col = row[j];
 			if(flag){
 				curr = elem;
 				((linked_list**)(A->private))[i] = curr;

@@ -13,6 +13,7 @@
 #include "SPBufferset.h"
 #include <math.h>
 #include <string.h>
+#include "matrix.h"
 
 static const double EPSILON = 0.00001;
 
