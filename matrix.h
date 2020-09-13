@@ -22,7 +22,7 @@ typedef struct _matrix{
 	int* g;
 }matrix;
 
-matrix* allocate_matrix(spmat* A, int size, int c, int* k, double* km, int* g);
+matrix* allocate_matrix(spmat* A, int size, double c, int* k, double* km, int* g);
 
 void free_matrix(matrix* Matrix);
 

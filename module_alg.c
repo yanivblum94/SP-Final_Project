@@ -133,7 +133,7 @@ list_of_lists* divide_network(spmat* A, int size, int* ranks, double* ranks_m, d
 	node *group;
 	matrix *Bg;
 	list_of_lists *groups, *non_divisible_groups;
-	char *func = "divide_network";
+	/*char *func = "divide_network";*/
 	groups = (list_of_lists*)calloc(1, sizeof(list_of_lists));
 	non_divisible_groups = (list_of_lists*)malloc(sizeof(list_of_lists));
 	g = (int*)calloc(size, sizeof(int));
@@ -145,7 +145,6 @@ list_of_lists* divide_network(spmat* A, int size, int* ranks, double* ranks_m, d
 	group = arry_to_list(g, size);
 	/*forceStop(func, 138);*/
 	add_group(groups, group);
-	forceStop(func, 140);
 	free(g);
 	free(group);
 	while(!is_empty(groups)){

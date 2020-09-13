@@ -14,7 +14,7 @@
 #include <math.h>
 #include <string.h>
 
-matrix* allocate_matrix(spmat* A, int size, int c, int* k, double* km, int* g){
+matrix* allocate_matrix(spmat* A, int size, double c, int* k, double* km, int* g){
 	matrix* matrixB = (matrix*)malloc(sizeof(matrix));
 	if(matrixB == NULL){
 		free(matrixB);
