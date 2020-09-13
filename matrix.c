@@ -1,7 +1,6 @@
 /*
  * matrix.c
  *
- *  Created on: 12 בספט׳ 2020
  *      Author: irist
  */
 #include "spmat.h"
@@ -216,32 +215,28 @@ void mult_shifted_matrix_with_vector(const struct _matrix* B, const double* v, d
 }
 
 double calc_norm_1(const struct _matrix* Matrix){
-	int i,j, size;
+	int i, j, size, flag;
 	linked_list *currlist;
 	double max, colsum;
 	max = 0.0;
-	colsum = 0;
+	colsum = 0.0;
 	size = Matrix->size;
 	for(j = 0; j < size; j++){
-		if(Matrix->g[j] != 0){
-			colsum = 0.0;
-			for(i = 0; i < size; i++){
-				if(Matrix->g[i] != 0){
-					currlist =  ((linked_list**)(Matrix->A -> private))[i];
-					while((currlist != NULL) && (currlist->col <= j)){
-						if(currlist->col == j){
-							if((currlist->val) < 0){
-								colsum += -(currlist->val);
-							}
-							else{
-								colsum += (currlist->val);
-							}
-						}
-						currlist = currlist->next;
+		colsum = 0.0;
+		for(i = 0; i < size; i++){
+			flag = 0;
+				currlist =  ((linked_list**)(Matrix->A -> private))[i];
+				while((currlist != NULL) && (currlist->col <= j)){
+					if(currlist->col == j){
+						colsum += fabs(currlist->val - ((Matrix->km[i])*(double)(Matrix->k[j])));
+						flag = 1;
 					}
-					colsum -= (Matrix->km[i])*(Matrix->k[j]);
-					}
-			}
+					currlist = currlist->next;
+
+				}
+				if(!flag){
+					colsum += fabs((Matrix->km[i])*(Matrix->k[j]));
+				}
 		}
 		if(colsum > max){
 			max = colsum;

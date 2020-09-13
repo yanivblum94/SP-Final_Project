@@ -1,7 +1,6 @@
 /*
  * matrix.h
  *
- *  Created on: 12 בספט׳ 2020
  *      Author: irist
  */
 

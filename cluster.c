@@ -31,6 +31,7 @@ void read_mat(spmat* A, FILE *input, int* ranks, int size){
 		}
 		/*printf("k of ith row %d %d \n" , k, i);*/
 		ranks[i] = k;
+		printf("ranks[%d] = %d\n" , i,ranks[i] );
 		if(k>0){
 		row = (double*)calloc(k, sizeof(double));
 		if(row == NULL){
@@ -80,6 +81,7 @@ int calc_M(int* ranks,int size){
 	for(i=0; i< size; i++){
 		m += ranks[i];
 	}
+	printf("m = %d", m);
 	return m;
 }
 
@@ -128,14 +130,12 @@ void list_to_arr(int* arr, node* set, int size){
 	qsort(arr,size, sizeof(int), compare);
 }
 
-double* calc_ranks_m(int* ranks, int m, int size){
-	double *ranks_m;
+void calc_ranks_m(int* ranks, double* ranks_m, int m, int size){
 	int i;
-	ranks_m = (double*)malloc(size*sizeof(double));
 	for(i = 0; i < size; i++){
-		ranks_m[i] = (double)(ranks[i]/m);
+		ranks_m[i] = ((double)(ranks[i]))/((double)m);
+		printf("rank[%d] = %f" , i,ranks_m[i] );
 	}
-	return ranks_m;
 }
 
 
@@ -174,8 +174,9 @@ int main(int argc, char* argv[]){
 	printf("matrix A size:  %d \n", A->n);
 	fclose(input);
 	/*print_mat(A);*/
+	ranks_m = (double*)calloc(size, sizeof(double));
 	m = calc_M(ranks,size);
-	ranks_m = calc_ranks_m(ranks, m, size);
+	calc_ranks_m(ranks, ranks_m, m, size);
 	sets = divide_network(A, size, ranks, ranks_m);
 	forceStop(func, 180);
 	sets_num = calc_num_sets(sets);
@@ -202,6 +203,7 @@ int main(int argc, char* argv[]){
 		free(set);
 	}
 	free(ranks);
+	free(ranks_m);
 	free(sets);
 	fclose(output);
 	free_in_list(A);
