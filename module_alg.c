@@ -213,48 +213,47 @@ double calculate_deltaQ(int* s, spmat* B){
 }*/
 
 /* initial array values to -1 */
-void indices_start(int* indices,int n){
+/*void indices_start(int* indices,int n){
 	int i;
 	for (i = 0; i < n; ++i) {
 		indices[i]=-1;
 	}
 }
 /* initial array unmoved to 1 if vertex on g */
-int unmoved_start(int* unmoved,int n,int* s){
-	int i,ng=0;
-	for (i = 0; i < n; ++i) {	/*making the unmoved group represnted by array*/
-			if(s[i]!=0){
-				unmoved[i]=1;
-				++ng;
-			}
+void unmoved_start(int* unmoved,int ng){
+	int i;
+	for (i = 0; i < ng; ++i) {	/*making the unmoved group represnted by array*/
+				unmoved[i]=i;
 		}
-	return ng;
+}
+int calc_ng(matrix* B){
+	int i, res;
+	res =0;
+	for(i=0; i < B->size; i++){
+		if(B->g[i] != 0){
+			res++;
+		}
+	}
+	return res;
 }
 
 void modularity_maximization(matrix* B , int* s){
 	double *score , *improve ;
-	double Q0 , maxscore, maxImprove, deltaQ;
-	int n ,ng, i, j , maxScoreVertex, maxImproveIndex;
+	double Q0 , maxscore=0.0, maxImprove, deltaQ;
+	int n ,ng, i, j , maxScoreVertex=0, maxImproveIndex;
 	int *unmoved, *indices;
 	n = B->size;
-	deltaQ = 0;
-	unmoved=(int*)calloc(1,sizeof(n));
-	indices=(int*)calloc(1,sizeof(n));
-	score=(double*)calloc(1,sizeof(n));
-	improve=(double*)calloc(1,sizeof(n));
-	indices_start(indices,n);
-	ng = unmoved_start(unmoved,n,s);
-	while(deltaQ >= 0){	/* main while according to line 31 of the alg'*/
+	deltaQ = calc_Q(s, B, n)*2;
+	ng = calc_ng(B);
+	unmoved=(int*)calloc(ng,sizeof(int));
+	indices=(int*)calloc(ng,sizeof(int));
+	score=(double*)calloc(ng,sizeof(double));
+	improve=(double*)calloc(ng,sizeof(double));
+	while(deltaQ > 0){	/* main while according to line 31 of the alg'*/
+	unmoved_start(unmoved, ng);
 	for (i = 0; i < ng; ++i) {	/* lines 3-20 alg4*/
-			Q0 = (calc_Q(s, B, n)*2);
-			s[0] = -s[0];
-			score[0] = (calc_Q(s, B, n)*2) - Q0;
-			maxscore = score[0];
-			maxScoreVertex = 0;
-			s[0] = -s[0];
-
-			for (j = 1; j < n; ++j) {/*for lines 6-10 on alg4 */
-				if(unmoved[j]!=0){
+			Q0 = calc_Q(s, B, n)*2;
+			for (j = 0; j < ng; ++j) {/*for lines 6-10 on alg4 */
 					s[j] = -s[j];
 					score[j] = (calc_Q(s, B, n)*2)-Q0;
 					s[j] = -s[j];
@@ -262,7 +261,6 @@ void modularity_maximization(matrix* B , int* s){
 						maxScoreVertex = j;
 						maxscore = score[j];
 					}
-				}
 			}
 			s[maxScoreVertex] = -s[maxScoreVertex];
 			indices[i] = maxScoreVertex;
