@@ -44,7 +44,7 @@ double mult_vectors_int(const double* v1, const int* v2, int n);
 void mult_sparse_with_vector(const struct _matrix* B, const double* v, double* result);
 void mult_Kmatrix_with_vector(const struct _matrix* B, const double* v, double* result);
 
-void sum_4_vectors(const double* v1, const double* v2,const double* v3, const double* f,  double* result, int size);
+void sum_4_vectors(double* v1, double* v2,double* v3, double* f, double* result, int size);
 
 void mult_shifted_matrix_with_vector(const struct _matrix* B, const double* v, double* result);
 

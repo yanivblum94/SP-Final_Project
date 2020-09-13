@@ -70,12 +70,12 @@ node* arry_to_list(int* array, int n){
 			elem->next = NULL;
 			if(first){
 				list = elem;
-				elem = curr_node;
+				curr_node = elem;
 				first = 0;
 			}
 			else{
 				curr_node->next = elem;
-				curr_node= curr_node->next;
+				curr_node = curr_node->next;
 				curr_node->next = NULL;
 			}
 		}
@@ -144,12 +144,10 @@ list_of_lists* divide_network(spmat* A, int size, int* ranks, double* ranks_m){
 	Bg = allocate_matrix(A, size, ranks, ranks_m, g);
 	Bg->c = calc_norm_1(Bg);
 	printf("norm is: %f \n" , Bg->c);
-	forceStop(func, 147);
 	group = arry_to_list(g, size);
 	printf("size in matrix  %d \n", Bg->size);
 	add_group(groups, group);
 	printf("added 1st group\n");
-	forceStop(func, 150);
 	free(g);
 	free(group);
 	while(!is_empty(groups)){
@@ -160,7 +158,6 @@ list_of_lists* divide_network(spmat* A, int size, int* ranks, double* ranks_m){
 		Bg->g = g;
 		s = (int*)calloc(size, sizeof(int));
 		is_divisible = division_to_2(Bg, s);
-		forceStop(func, 160);
 			if(!is_divisible){
 				/*add g to O*/
 				add_group(non_divisible_groups, group);
@@ -178,7 +175,9 @@ list_of_lists* divide_network(spmat* A, int size, int* ranks, double* ranks_m){
 						g2[j] = -1;
 					}
 				}
+				forceStop(func, 178);
 				group1 = arry_to_list(g1, size);
+				forceStop(func, 179);
 				group2 = arry_to_list(g2, size);
 				/*if one of the groups is empty or has only one element*/
 				if((group1 == NULL) || (group1->next == NULL)){ /*size of 0 or 1*/
@@ -196,7 +195,7 @@ list_of_lists* divide_network(spmat* A, int size, int* ranks, double* ranks_m){
 				free(group1);
 				free(group2);
 			}
-			forceStop(func, 195);
+			/*forceStop(func, 195);*/
 	}
 	free(s);
 	forceStop(func, 196);

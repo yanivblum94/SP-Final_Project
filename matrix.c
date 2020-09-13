@@ -185,13 +185,13 @@ void mult_Kmatrix_with_vector(const struct _matrix* B, const double* v, double* 
 		}
 			}
 				}
+		result[i] = dotproduct;
 	}
-	result[i] = dotproduct;
 }
 
 
 
-void sum_4_vectors(const double* v1, const double* v2,const double* v3, const double* f,  double* result, int size){
+void sum_4_vectors(double* v1, double* v2, double* v3, double* f,  double* result, int size){
 	int i;
 	for(i = 0; i < size; i++){
 		result[i] = v1[i] - v2[i] - f[i] + v3[i];
@@ -200,14 +200,15 @@ void sum_4_vectors(const double* v1, const double* v2,const double* v3, const do
 
 void mult_shifted_matrix_with_vector(const struct _matrix* B, const double* v, double* result){
 	double *v1, *v2, *v3, *f;
+	int size = B->size;
 	f = calc_f(B);
-	v1 = (double*)calloc( B->size,sizeof(double));
-	v2 = (double*)calloc( B->size,sizeof(double));
-	v3 = (double*)calloc( B->size,sizeof(double));
+	v1 = (double*)calloc(size,sizeof(double));
+	v2 = (double*)calloc(size,sizeof(double));
+	v3 = (double*)calloc(size,sizeof(double));
 	mult_sparse_with_vector(B, v, v1);
 	mult_Kmatrix_with_vector(B, v, v2);
 	mult_vector_with_I(B, v3);
-	sum_4_vectors(v1, v2, v3, f, result, B->size);
+	sum_4_vectors(v1, v2, v3, f, result, size);
 	free(v1);
 	free(v2);
 	free(v3);
