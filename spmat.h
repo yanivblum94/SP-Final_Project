@@ -1,9 +1,9 @@
-
+/* This module describes sparse matrix as described in HW2 with some extras for the project*/
 
 #ifndef SPMAT_H_
 #define SPMAT_H_
 
-
+/*the definition of the spmat struct*/
 typedef struct _spmat {
 	/* Matrix size (n*n) */
 	int		n;
@@ -23,6 +23,7 @@ typedef struct _spmat {
 	void	*private;
 } spmat;
 
+/*definition of linked list struct for the sparse matrix*/
 typedef struct _linked_list{
 
 	/*value*/

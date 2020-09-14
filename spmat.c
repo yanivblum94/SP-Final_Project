@@ -12,7 +12,12 @@ void forceStop(const char* func,const int line){
 	printf("\n ~ forced to stop in %s, line %d", func, line);
 	exit(EXIT_SUCCESS);
 }
-/* Allocates a new linked-lists sparse matrix of size n */
+
+/**
+ *  Allocates a new linked-lists sparse matrix of size n
+ * @param n - size of matrix
+ * @return spamt with allocated memory
+ */
 spmat* spmat_allocate(int n){
 	spmat* matrix = (spmat*)calloc(1, sizeof(spmat));
 	if(matrix==NULL){
@@ -44,7 +49,13 @@ spmat* spmat_allocate(int n){
 
 }
 
-
+/**
+ * adds row to the matrix based on the input file described for the project
+ * @param A - the spmat he rows are added to
+ * @param row - array of numbers to be added
+ * @param i - the row number
+ * @param k - size of array
+ */
 void add_row_in_list(struct _spmat *A, const double *row, int i, int k){
 	int j,flag;
 	linked_list *elem, *curr;
@@ -73,7 +84,10 @@ void add_row_in_list(struct _spmat *A, const double *row, int i, int k){
 	}
 }
 
-
+/**
+ * frees the spmat
+ * @param A - the mat that is freed
+ */
 void free_in_list(struct _spmat *A){
 	int i;
 	linked_list *currlist, *temp;
@@ -94,7 +108,12 @@ void free_in_list(struct _spmat *A){
 	free(A);
 }
 
-
+/**
+ * performs mult of matrix with vector of double values
+ * @param A - The matrix being multiplied
+ * @param v - the vector being multiplied
+ * @param result - the result vector which is changed in the method
+ */
 void mult_matrix_with_double_vector(const struct _spmat *A, const double *v, double *result){
 	int i, j, n;
 	double dotproduct;
@@ -112,6 +131,12 @@ void mult_matrix_with_double_vector(const struct _spmat *A, const double *v, dou
 	}
 }
 
+/**
+ * performs mult of matrix with vector of int values
+ * @param A - The matrix being multiplied
+ * @param v - the vector being multiplied
+ * @param result - the result vector which is changed in the method
+ */
 void mult_matrix_with_int_vector(const struct _spmat *A, const int *v, double *result){
 	int i, j, n;
 	double dotproduct;
@@ -129,7 +154,11 @@ void mult_matrix_with_int_vector(const struct _spmat *A, const int *v, double *r
 	}
 }
 
-
+/**
+ * calculates the norm of a matrix
+ * @param A - the matrix whose norm is calculated
+ * @return the norm
+ */
 
 double calc_norm_1_A(const struct _spmat *A){
 	int i,j,n;

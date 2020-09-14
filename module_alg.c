@@ -17,7 +17,13 @@
 #include "module_alg.h"
 
 
-
+/**
+ * calculates Q value
+ * @param s - s vector
+ * @param B - B matrix
+ * @param n - size of A
+ * @return - Q
+ */
 double calc_Q(int* s, matrix* B, int n){
 	double q;
 	double *result = (double*)malloc(n*sizeof(double));
@@ -27,6 +33,12 @@ double calc_Q(int* s, matrix* B, int n){
 	return q;
 }
 
+/**
+ * Algorithm 2 from the doc
+ * @param Bg - Bg matrix
+ * @param s - s vector
+ * @return - whether the group is divisible or not
+ */
 int division_to_2(matrix* Bg, int* s){
 	double eigen_val;
 	double *eigenvector;
@@ -60,6 +72,12 @@ int division_to_2(matrix* Bg, int* s){
 	return is_divisible;
 }
 
+/**
+ * makes an array into a list
+ * @param array - the array we want to make into a list
+ * @param n - size of A
+ * @return the first node of the list
+ */
 node* arry_to_list(int* array, int n){
 	node *curr_node, *elem, *list;
 	int i, first;
@@ -84,7 +102,11 @@ node* arry_to_list(int* array, int n){
 	}
 	return list;
 }
-
+/**
+ * makes a list into an array
+ * @param list - the list we get
+ * @param array - the array we get in the end
+ */
 void list_to_array(node* list, int* array){
 	while(list != NULL){
 		array[list->val] = 1;
@@ -99,7 +121,11 @@ void print_array(int* g, int n){
 	}
 }
 
-
+/**
+ * adds a group to the division
+ * @param groups - the list of groups
+ * @param group - the set we want to add
+ */
 void add_group(list_of_lists* groups, node* group){
 	/*list_of_lists *new_group;*/
 	if(groups->node == NULL){/* empty set */
@@ -120,6 +146,11 @@ void add_group(list_of_lists* groups, node* group){
 	}
 }
 
+/**
+ * removes a set from the list of sets
+ * @param groups - the list of groups
+ * @return - reeturns the removed set
+ */
 node* remove_group(list_of_lists* groups){
 	list_of_lists* temp;
 	node *group = groups->node;
@@ -134,6 +165,11 @@ node* remove_group(list_of_lists* groups){
 	return group;
 }
 
+/**
+ * checks if the list of lists is empty
+ * @param groups - the list of sets
+ * @return 1 if empty, 0 else
+ */
 int is_empty(list_of_lists* groups){
 	if(groups == NULL){
 		return 1;
@@ -143,6 +179,14 @@ int is_empty(list_of_lists* groups){
 	}
 }
 
+/**
+ * divides the graph into modularity sets
+ * @param A - the matrix graph
+ * @param size - size of A
+ * @param ranks - ranks vector
+ * @param ranks_m - vector of Ki/M
+ * @return the list of divided sets
+ */
 list_of_lists* divide_network(spmat* A, int size, int* ranks, double* ranks_m){
 	int i, j, is_divisible, *g, *g1, *g2, *s;
 	node *group;
@@ -219,13 +263,22 @@ list_of_lists* divide_network(spmat* A, int size, int* ranks, double* ranks_m){
 	return non_divisible_groups;
 }
 
-/* initial array unmoved to 1 if vertex on g */
+/**
+ * makes the unmoved array for algo 4
+ * @param unmoved - the array we want
+ * @param ng - size of Bg
+ */
 void unmoved_start(int* unmoved,int ng){
 	int i;
 	for (i = 0; i < ng; ++i) {	/*making the unmoved group represnted by array*/
 				unmoved[i]=i;
 		}
 }
+/**
+ * calculates the size of Bg
+ * @param B - B matrix
+ * @return size of Bg
+ */
 int calc_ng(matrix* B){
 	int i, res;
 	res =0;
@@ -236,7 +289,11 @@ int calc_ng(matrix* B){
 	}
 	return res;
 }
-
+ /**
+  * Algo 4
+  * @param B - B matrix
+  * @param s - s vector
+  */
 void modularity_maximization(matrix* B , int* s){
 	double *score , *improve ;
 	double Q0 , max_score=0.0, max_improve=0, deltaQ;
@@ -291,6 +348,13 @@ void modularity_maximization(matrix* B , int* s){
 	}
 }
 
+/**
+ * calculates eigen pair for B
+ * @param B - B matrix
+ * @param eigenvector - vector of eigens
+ * @param n - size of A
+ * @return the eigen value
+ */
 double calc_B_eigen_pair(matrix* B, double *eigenvector, int n){
 	double *currvector;
 	double eigen_val;

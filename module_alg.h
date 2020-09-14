@@ -1,7 +1,5 @@
-/*
- * module_alg.h
- *
- *      Author: irist
+/**
+ * this module contains all of the algorithms of the network division
  */
 #include "spmat.h"
 #include "matrix.h"
@@ -10,6 +8,7 @@
 #ifndef MODULE_ALG_H_
 #define MODULE_ALG_H_
 
+/*the struct node represents the head of a list*/
 typedef struct _node{
 
 	/*value*/
@@ -20,6 +19,7 @@ typedef struct _node{
 
 }node;
 
+/*this struct represents the division groups that we have*/
 typedef struct _list_of_lists{
 
 	/*node*/
