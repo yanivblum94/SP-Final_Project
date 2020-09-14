@@ -37,11 +37,9 @@ void free_matrix(matrix* Matrix){
 	free(Matrix);
 }
 
-double* calc_f(const struct _matrix* B){
+void calc_f(const struct _matrix* B, double* f){
 	int j,i;
 	double sum;
-	double* f;
-	f = (double*)calloc(B->size, sizeof(double));
 	for(j = 0; j < B->size; j++){
 		sum = 0.0;
 		if(B->g[j] != 0){
@@ -58,13 +56,11 @@ double* calc_f(const struct _matrix* B){
 					}
 					curr = curr->next;
 				}
-				free(curr);
 			}
 			}
 	}
 		f[j] = sum;
 	}
-	return f;
 }
 
 void mult_vector_with_Kmatrix(const struct _matrix* B, const int* v, double* result){
@@ -76,11 +72,11 @@ void mult_vector_with_Kmatrix(const struct _matrix* B, const int* v, double* res
 			for(j=0; j < B->size; j++){
 				if(B->g[j] != 0){
 					dotproduct += B->km[j] * B->k[i] * v[j];
-		}
-			}
 				}
-	}
+			}
+		}
 	result[i] = dotproduct;
+	}
 }
 
 void mult_vector_with_I(const struct _matrix* B, double* result){
@@ -100,13 +96,14 @@ void sum_3_vectors(const double* v1, const double* v2,double* f,  double* result
 }
 
 void mult_vector_with_sparse(const struct _matrix* B, const int* v, double* result){
-	int i, j;
+	int i, j, size;
 	double dotproduct;
 	linked_list *currlist;
-	for(j = 0 ; j < B->size; j++){
+	size = B->size;
+	for(j = 0 ; j < size; j++){
 		dotproduct = 0.0;
 		if(B->g[j]!=0){
-			for(i = 0; i < B->size; i++){
+			for(i = 0; i < size; i++){
 				currlist = ((linked_list**)(B->A -> private))[i];
 				while(currlist != NULL && currlist->col <= j){
 					if(currlist->col == i  &&  B->g[currlist->col]!=0 ){
@@ -114,7 +111,6 @@ void mult_vector_with_sparse(const struct _matrix* B, const int* v, double* resu
 					}
 					currlist = currlist->next;
 				}
-				free(currlist);
 			}
 		}
 		result[j] = dotproduct;
@@ -123,12 +119,14 @@ void mult_vector_with_sparse(const struct _matrix* B, const int* v, double* resu
 
 void mult_vector_with_matrix(const struct _matrix* B, const int* s, double* result){
 	double *v1, *v2, *f;
-	f = calc_f(B);
-	v1 = (double*)calloc( B->size,sizeof(double));
-	v2 = (double*)calloc( B->size,sizeof(double));
+	int size = B->size;
+	f = (double*)calloc(size, sizeof(double));
+	v1 = (double*)calloc(size, sizeof(double));
+	v2 = (double*)calloc(size, sizeof(double));
+	calc_f(B, f);
 	mult_vector_with_sparse(B, s, v1);
 	mult_vector_with_Kmatrix(B, s, v2);
-	sum_3_vectors(v1, v2, f, result, B->size);
+	sum_3_vectors(v1, v2, f, result, size);
 	free(v1);
 	free(v2);
 	free(f);
@@ -167,7 +165,6 @@ void mult_sparse_with_vector(const struct _matrix* B, const double* v, double* r
 				}
 				curr = curr->next;
 			}
-				free(curr);
 			}
 		result[i] = sum;
 	}
@@ -200,16 +197,16 @@ void sum_4_vectors(const double* v1, const double* v2,const double* v3, const do
 
 void mult_shifted_matrix_with_vector(const struct _matrix* B, const double* v, double* result){
 	double *v1, *v2, *v3, *f;
-	f = calc_f(B);
-	v1 = (double*)calloc( B->size,sizeof(double));
-	v2 = (double*)calloc( B->size,sizeof(double));
-	v3 = (double*)calloc( B->size,sizeof(double));
+	int size = B->size;
+	f = (double*)calloc(size,sizeof(double));
+	v1 = (double*)calloc(size,sizeof(double));
+	v2 = (double*)calloc(size,sizeof(double));
+	v3 = (double*)calloc(size,sizeof(double));
+	calc_f(B, f);
 	mult_sparse_with_vector(B, v, v1);
 	mult_Kmatrix_with_vector(B, v, v2);
-	free(v2);
 	mult_vector_with_I(B, v3);
-	v2 = (double*)calloc( B->size,sizeof(double));
-	sum_4_vectors(v1, v2, v3, f, result, B->size);
+	sum_4_vectors(v1, v2, v3, f, result, size);
 	free(v2);
 	free(v1);
 	free(v3);

@@ -177,6 +177,7 @@ list_of_lists* divide_network(spmat* A, int size, int* ranks, double* ranks_m){
 			if(!is_divisible){
 				/*add g to O*/
 				add_group(non_divisible_groups, group);
+				forceStop(func, 180);
 				free(group);
 			}
 			else{

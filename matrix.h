@@ -25,7 +25,7 @@ matrix* allocate_matrix(spmat* A, int size, int* k, double* km, int* g);
 
 void free_matrix(matrix* Matrix);
 
-double* calc_f(const struct _matrix* B);
+void calc_f(const struct _matrix* B, double* f);
 
 void mult_vector_with_Kmatrix(const struct _matrix* B, const int* v, double* result);
 
