@@ -31,6 +31,7 @@ int division_to_2(matrix* Bg, int* s){
 	double eigen_val;
 	double *eigenvector;
 	int size, i, is_divisible;
+	char *func = "division_to_2";
 	size = Bg->size;
 	is_divisible = 1;
 	eigenvector = (double*)malloc(size*sizeof(double));
@@ -53,6 +54,7 @@ int division_to_2(matrix* Bg, int* s){
 	}
 	else{
 		modularity_maximization(Bg ,s);
+		forceStop(func, 57);
 	}
 	free(eigenvector);
 	return is_divisible;
@@ -90,32 +92,45 @@ void list_to_array(node* list, int* array){
 	}
 }
 
+void print_array(int* g, int n){
+	int i;
+	for(i = 0; i < n; i++){
+		printf("g[%d] = %d\n", i, g[i]);
+	}
+}
+
 
 void add_group(list_of_lists* groups, node* group){
-	list_of_lists *new_group;
-	if(groups->node == NULL){
-		new_group = (list_of_lists*)malloc(sizeof(list_of_lists));
-		new_group->node = group;
-		groups = new_group;
+	/*list_of_lists *new_group;*/
+	if(groups->node == NULL){/* empty set */
+		/*new_group = (list_of_lists*)malloc(sizeof(list_of_lists));*/
+		groups->node = group;
+		groups->next = NULL;
+		/*groups = new_group;*/
 	}
 	else{
 		while(groups->next != NULL){
 				groups = groups->next;
 			}
-			new_group = (list_of_lists*)malloc(sizeof(list_of_lists));
+			/*new_group = (list_of_lists*)malloc(sizeof(list_of_lists));
 			new_group->node = group;
-			new_group->next = NULL;
-			groups->next = new_group;
+			new_group->next = NULL;*/
+			groups->next->node = group;
+			groups->next->next = NULL;
 	}
-
 }
 
 node* remove_group(list_of_lists* groups){
-	list_of_lists* elem_to_remove;
+	list_of_lists* temp;
 	node *group = groups->node;
-	elem_to_remove = groups;
-	groups = groups->next;
-	free(elem_to_remove);
+	if (groups->next == NULL){/* the set contains only one group*/
+		groups->node = NULL;
+	}
+	else{
+		temp = groups->next->next;
+		groups->node = groups->next->node;
+		groups->next = temp;
+	}
 	return group;
 }
 
@@ -149,13 +164,14 @@ list_of_lists* divide_network(spmat* A, int size, int* ranks, double* ranks_m){
 	add_group(groups, group);
 	printf("added 1st group\n");
 	free(g);
-	free(group);
+	/*free(group);*/
 	while(!is_empty(groups)){
 		/*remove a group from P and represent the group as an int array g*/
 		group = remove_group(groups);
 		g = (int*)calloc(size, sizeof(int));
 		list_to_array(group, g);
 		Bg->g = g;
+		print_array(Bg->g, size);
 		s = (int*)calloc(size, sizeof(int));
 		is_divisible = division_to_2(Bg, s);
 			if(!is_divisible){
@@ -213,47 +229,48 @@ double calculate_deltaQ(int* s, spmat* B){
 }*/
 
 /* initial array values to -1 */
-/*void indices_start(int* indices,int n){
+void indices_start(int* indices,int n){
 	int i;
 	for (i = 0; i < n; ++i) {
 		indices[i]=-1;
 	}
 }
 /* initial array unmoved to 1 if vertex on g */
-void unmoved_start(int* unmoved,int ng){
-	int i;
-	for (i = 0; i < ng; ++i) {	/*making the unmoved group represnted by array*/
-				unmoved[i]=i;
+int unmoved_start(int* unmoved,int n,int* s){
+	int i,ng=0;
+	for (i = 0; i < n; ++i) {	/*making the unmoved group represnted by array*/
+			if(s[i]!=0){
+				unmoved[i]=1;
+				++ng;
+			}
 		}
-}
-int calc_ng(matrix* B){
-	int i, res;
-	res =0;
-	for(i=0; i < B->size; i++){
-		if(B->g[i] != 0){
-			res++;
-		}
-	}
-	return res;
+	return ng;
 }
 
 void modularity_maximization(matrix* B , int* s){
 	double *score , *improve ;
-	double Q0 , maxscore=0.0, maxImprove, deltaQ;
-	int n ,ng, i, j , maxScoreVertex=0, maxImproveIndex;
+	double Q0 , maxscore, maxImprove, deltaQ;
+	int n ,ng, i, j , maxScoreVertex, maxImproveIndex;
 	int *unmoved, *indices;
 	n = B->size;
-	deltaQ = calc_Q(s, B, n)*2;
-	ng = calc_ng(B);
-	unmoved=(int*)calloc(ng,sizeof(int));
-	indices=(int*)calloc(ng,sizeof(int));
-	score=(double*)calloc(ng,sizeof(double));
-	improve=(double*)calloc(ng,sizeof(double));
-	while(deltaQ > 0){	/* main while according to line 31 of the alg'*/
-	unmoved_start(unmoved, ng);
+	deltaQ = 0;
+	unmoved=(int*)calloc(1,sizeof(n));
+	indices=(int*)calloc(1,sizeof(n));
+	score=(double*)calloc(1,sizeof(n));
+	improve=(double*)calloc(1,sizeof(n));
+	indices_start(indices,n);
+	ng = unmoved_start(unmoved,n,s);
+	while(deltaQ >= 0){	/* main while according to line 31 of the alg'*/
 	for (i = 0; i < ng; ++i) {	/* lines 3-20 alg4*/
-			Q0 = calc_Q(s, B, n)*2;
-			for (j = 0; j < ng; ++j) {/*for lines 6-10 on alg4 */
+			Q0 = (calc_Q(s, B, n)*2);
+			s[0] = -s[0];
+			score[0] = (calc_Q(s, B, n)*2) - Q0;
+			maxscore = score[0];
+			maxScoreVertex = 0;
+			s[0] = -s[0];
+
+			for (j = 1; j < n; ++j) {/*for lines 6-10 on alg4 */
+				if(unmoved[j]!=0){
 					s[j] = -s[j];
 					score[j] = (calc_Q(s, B, n)*2)-Q0;
 					s[j] = -s[j];
@@ -261,6 +278,7 @@ void modularity_maximization(matrix* B , int* s){
 						maxScoreVertex = j;
 						maxscore = score[j];
 					}
+				}
 			}
 			s[maxScoreVertex] = -s[maxScoreVertex];
 			indices[i] = maxScoreVertex;

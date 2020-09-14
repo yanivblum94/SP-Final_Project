@@ -14,12 +14,12 @@ void forceStop(const char* func,const int line){
 }
 /* Allocates a new linked-lists sparse matrix of size n */
 spmat* spmat_allocate(int n){
-	spmat* matrix = (spmat*)malloc(sizeof(spmat));
+	spmat* matrix = (spmat*)calloc(1, sizeof(spmat));
 	if(matrix==NULL){
 			matrix->free(matrix);
 			return NULL;
 	}
-	matrix->private = (linked_list**)malloc(n*sizeof(linked_list*));
+	matrix->private = (linked_list**)calloc(n, sizeof(linked_list*));
 	if(matrix->private==NULL){
 				matrix->free(matrix);
 				return NULL;

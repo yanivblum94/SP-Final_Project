@@ -1,6 +1,7 @@
 
 #include "spmat.h"
 #include "module_alg.h"
+#include "eigen_pair.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>

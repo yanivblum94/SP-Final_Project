@@ -18,30 +18,28 @@
 
 
 void read_mat(spmat* A, FILE *input, int* ranks, int size){
-	int i,k,j;
+	int i,k,j, flag;
 	int n;
 	double *row;
 	int *row_tmp;
-	char *func = "red_mat";
+	/*char *func = "red_mat";*/
 	printf("entered read_mat \n");
 	for(i = 0; i < size; i++){
+		flag = 0;
 		n = fread(&k, sizeof(int), 1, input);
 		if(n != 1){
 			printf("Couldn't read the %d", i);
 		}
-		/*printf("k of ith row %d %d \n" , k, i);*/
 		ranks[i] = k;
-		printf("ranks[%d] = %d\n" , i,ranks[i] );
+		/*printf("ranks[%d] = %d\n" , i,ranks[i] );*/
 		if(k>0){
 		row = (double*)calloc(k, sizeof(double));
 		if(row == NULL){
 			printf("Couldn't allocate memory");
-			forceStop(func, 41);
 		}
 		row_tmp = (int*)calloc(k, sizeof(int));
 		if(row_tmp == NULL){
 			printf("Couldn't allocate memory");
-			forceStop(func, 46);
 		}
 		n = fread(row_tmp, sizeof(int), k, input);
 		if(n != k){
@@ -49,9 +47,14 @@ void read_mat(spmat* A, FILE *input, int* ranks, int size){
 		}
 		for(j = 0; j < k; j++){
 			/*printf("row_tmp[j] = %d  \n", row_tmp[j]);*/
+			if(row[j] != 0){
+				flag = 1;
+			}
 			row[j] = (double) row_tmp[j];
 		}
-		A->add_row(A, row, i, k);
+		if(flag){
+			A->add_row(A, row, i, k);
+		}
 		free(row);
 		free(row_tmp);
 	}
