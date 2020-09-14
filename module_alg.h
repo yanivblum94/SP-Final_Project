@@ -45,9 +45,10 @@ void list_to_array(node* list, int* array);
 
 void add_group(list_of_lists* groups, node* group);
 
-void indices_start(int* indices,int n);
 
-int unmoved_start(int* unmoved,int n,int* s);
+void unmoved_start(int* unmoved,int ng);
+
+int calc_ng(matrix* B);
 
 void modularity_maximization(matrix* BgHat , int* s);
 

@@ -218,23 +218,6 @@ list_of_lists* divide_network(spmat* A, int size, int* ranks, double* ranks_m){
 	return non_divisible_groups;
 }
 
-/* calculate Q: by definition
-double calculate_deltaQ(int* s, spmat* B){
-	double result, *temp=(double*)calloc(1,sizeof(B->n));
-	mult_vector_with_matrix(B,s,temp);
-	result = mult_vectors(temp, s, B->n);
-	return (result*0.5);
-
-
-}*/
-
-/* initial array values to -1 */
-/*void indices_start(int* indices,int n){
-	int i;
-	for (i = 0; i < n; ++i) {
-		indices[i]=-1;
-	}
-}
 /* initial array unmoved to 1 if vertex on g */
 void unmoved_start(int* unmoved,int ng){
 	int i;
@@ -255,8 +238,8 @@ int calc_ng(matrix* B){
 
 void modularity_maximization(matrix* B , int* s){
 	double *score , *improve ;
-	double Q0 , maxscore=0.0, maxImprove, deltaQ;
-	int n ,ng, i, j , maxScoreVertex=0, maxImproveIndex;
+	double Q0 , max_score=0.0, max_improve=0, deltaQ;
+	int n ,ng, i, j , max_score_vertex=0, max_improve_index;
 	int *unmoved, *indices;
 	n = B->size;
 	deltaQ = calc_Q(s, B, n)*2;
@@ -270,36 +253,39 @@ void modularity_maximization(matrix* B , int* s){
 	for (i = 0; i < ng; ++i) {	/* lines 3-20 alg4*/
 			Q0 = calc_Q(s, B, n)*2;
 			for (j = 0; j < ng; ++j) {/*for lines 6-10 on alg4 */
+				if(unmoved[j]>0){
 					s[j] = -s[j];
 					score[j] = (calc_Q(s, B, n)*2)-Q0;
 					s[j] = -s[j];
-					if(score[j] > maxscore){
-						maxScoreVertex = j;
-						maxscore = score[j];
+					if(score[j] > max_score){
+						max_score_vertex = j;
+						max_score = score[j];
 					}
-			}
-			s[maxScoreVertex] = -s[maxScoreVertex];
-			indices[i] = maxScoreVertex;
-			if(i == 0){
-				improve[i] = score[maxScoreVertex];
-				maxImprove = improve[i];
-				maxImproveIndex = i;
-			}else{
-				improve[i] = improve[i-1] + score[maxScoreVertex];
-				if(improve[i] > maxImprove){ /*maintain maximprove for next part*/
-					maxImprove = improve[i];
-					maxImproveIndex = i;
 				}
 			}
-			unmoved[maxScoreVertex] = 0;
+			s[max_score_vertex] = -s[max_score_vertex];
+			indices[i] = max_score_vertex;
+			if(i == 0){
+				improve[i] = score[max_score_vertex];
+				max_improve = improve[i];
+				max_improve_index = i;
+			}
+			else{
+				improve[i] = improve[i-1] + score[max_score_vertex];
+				if(improve[i] > max_improve){ /*maintain max_improve for next part*/
+					max_improve = improve[i];
+					max_improve_index = i;
+				}
+			}
+			unmoved[max_score_vertex] = -1;
 		}
-	for(i = ng-1; i > maxImproveIndex; --i){
+	for(i = ng-1; i > max_improve_index; --i){
 		s[indices[i]] = -s[indices[i]];
 	}
-	if(maxImproveIndex == (ng-1)){
+	if(max_improve_index == (ng-1)){
 		deltaQ = 0;
 	}else{
-		deltaQ = improve[maxImproveIndex];
+		deltaQ = improve[max_improve_index];
 		}
 	}
 }
