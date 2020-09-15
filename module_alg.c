@@ -24,11 +24,11 @@
  * @param n - size of A
  * @return - Q
  */
-double calc_Q(int* s, matrix* B, int n){
+double calc_Q(const int* s, matrix* B, int n){
 	double q;
 	double *result = (double*)malloc(n*sizeof(double));
 	mult_vector_with_matrix(B, s, result);
-	q = 0.5*mult_vectors_int(result, s, n);
+	q = 0.5*(double)(mult_vectors_int(result, s, n));
 	free(result);
 	return q;
 }
@@ -194,7 +194,7 @@ list_of_lists* divide_network(spmat* A, int size, int* ranks, double* ranks_m){
 	list_of_lists *groups, *non_divisible_groups;
 	char *func = "divide_network";
 	groups = (list_of_lists*)calloc(1, sizeof(list_of_lists));
-	non_divisible_groups = (list_of_lists*)malloc(sizeof(list_of_lists));
+	non_divisible_groups = (list_of_lists*)calloc(1, sizeof(list_of_lists));
 	g = (int*)calloc(size, sizeof(int));
 	/*create the first group*/
 	for(i = 0; i < size; i++){
@@ -221,8 +221,6 @@ list_of_lists* divide_network(spmat* A, int size, int* ranks, double* ranks_m){
 			if(!is_divisible){
 				/*add g to O*/
 				add_group(non_divisible_groups, group);
-				forceStop(func, 180);
-				free(group);
 			}
 			else{
 				node *group1, *group2;

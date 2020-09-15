@@ -40,16 +40,16 @@ void free_matrix(matrix* Matrix){
 void calc_f(const struct _matrix* B, double* f){
 	int j,i;
 	double sum;
-	for(j = 0; j < B->size; j++){
+	for(i = 0; i < B->size; i++){
 		sum = 0.0;
-		if(B->g[j] != 0){
-			for(i = 0; i< B->size; i++){
-				if(B->g[i] != 0){
-				sum += B->km[j] * B->k[i];
+		if(B->g[i] != 0){
+			for(j = 0; j< B->size; j++){
+				if(B->g[j] != 0){
+				sum -= B->km[i] * B->k[j];
 			}
-			if(((linked_list**)(B->A->private))[j] != NULL){
+			if(((linked_list**)(B->A->private))[i] != NULL){
 				linked_list *curr;
-				curr = ((linked_list**)(B->A->private))[j];
+				curr = ((linked_list**)(B->A->private))[i];
 				while(curr != NULL){
 					if(B->g[curr->col] != 0){
 					sum += curr->val;
@@ -59,23 +59,23 @@ void calc_f(const struct _matrix* B, double* f){
 			}
 			}
 	}
-		f[j] = sum;
+		f[i] = sum;
 	}
 }
 
 void mult_vector_with_Kmatrix(const struct _matrix* B, const int* v, double* result){
 	int i, j;
 	double dotproduct;
-	for(i = 0; i < B->size; i++){
+	for(j = 0; j < B->size; j++){
 		dotproduct = 0.0;
-		if(B->g[i]!= 0){
-			for(j=0; j < B->size; j++){
-				if(B->g[j] != 0){
-					dotproduct += B->km[j] * B->k[i] * v[j];
+		if(B->g[j]!= 0){
+			for(i=0; i < B->size; i++){
+				if(B->g[i] != 0){
+					dotproduct += B->km[i] * B->k[j] * v[i];
 				}
 			}
 		}
-	result[i] = dotproduct;
+	result[j] = dotproduct;
 	}
 }
 
@@ -94,6 +94,25 @@ void sum_3_vectors(const double* v1, const double* v2,double* f,  double* result
 		result[i] = v1[i] - v2[i] - f[i];
 	}
 }
+void mult_vector_with_f_int(const struct _matrix* B, const int* v, const double* f, double* result){
+	int  i;
+	int size = B->size;
+	for( i = 0; i < size; i++){
+		if(B->g[i] != 0){
+			result[i] = (double)v[i]*f[i];
+		}
+	}
+}
+
+void mult_vector_with_f_double(const struct _matrix* B, const double* v, const double* f, double* result){
+	int  i;
+	int size = B->size;
+	for( i = 0; i < size; i++){
+		if(B->g[i] != 0){
+			result[i] = (double)v[i]*f[i];
+		}
+	}
+}
 
 void mult_vector_with_sparse(const struct _matrix* B, const int* v, double* result){
 	int i, j, size;
@@ -106,7 +125,7 @@ void mult_vector_with_sparse(const struct _matrix* B, const int* v, double* resu
 			for(i = 0; i < size; i++){
 				currlist = ((linked_list**)(B->A -> private))[i];
 				while(currlist != NULL && currlist->col <= j){
-					if(currlist->col == i  &&  B->g[currlist->col]!=0 ){
+					if(currlist->col == j  &&  B->g[currlist->col]!=0 ){
 						dotproduct += (double)(currlist->val * v[i]);
 					}
 					currlist = currlist->next;
@@ -118,17 +137,20 @@ void mult_vector_with_sparse(const struct _matrix* B, const int* v, double* resu
 }
 
 void mult_vector_with_matrix(const struct _matrix* B, const int* s, double* result){
-	double *v1, *v2, *f;
+	double *v1, *v2, *f, *v3;
 	int size = B->size;
 	f = (double*)calloc(size, sizeof(double));
 	v1 = (double*)calloc(size, sizeof(double));
 	v2 = (double*)calloc(size, sizeof(double));
+	v3 = (double*)calloc(size, sizeof(double));
 	calc_f(B, f);
 	mult_vector_with_sparse(B, s, v1);
 	mult_vector_with_Kmatrix(B, s, v2);
-	sum_3_vectors(v1, v2, f, result, size);
+	mult_vector_with_f_int(B ,s ,f, v3);
+	sum_3_vectors(v1, v2, v3, result, size);
 	free(v1);
 	free(v2);
+	free(v3);
 	free(f);
 }
 
@@ -145,7 +167,7 @@ double mult_vectors_int(const double* v1, const int* v2, int n){
 	int i;
 	double result = 0.0;
 	for(i = 0; i < n; i++){
-		result += (*(v1+i))*(*(v2+i));
+		result += (double)(v1[i]*v2[i]);
 	}
 	return result;
 }
@@ -196,20 +218,23 @@ void sum_4_vectors(const double* v1, const double* v2,const double* v3, const do
 }
 
 void mult_shifted_matrix_with_vector(const struct _matrix* B, const double* v, double* result){
-	double *v1, *v2, *v3, *f;
+	double *v1, *v2, *v3, *f, *v4;
 	int size = B->size;
 	f = (double*)calloc(size,sizeof(double));
 	v1 = (double*)calloc(size,sizeof(double));
 	v2 = (double*)calloc(size,sizeof(double));
 	v3 = (double*)calloc(size,sizeof(double));
+	v4 = (double*)calloc(size,sizeof(double));
 	calc_f(B, f);
 	mult_sparse_with_vector(B, v, v1);
 	mult_Kmatrix_with_vector(B, v, v2);
 	mult_vector_with_I(B, v3);
-	sum_4_vectors(v1, v2, v3, f, result, size);
+	mult_vector_with_f_double(B ,v ,f, v4);
+	sum_4_vectors(v1, v2, v3, v4, result, size);
 	free(v2);
 	free(v1);
 	free(v3);
+	free(v4);
 	free(f);
 }
 

@@ -32,7 +32,7 @@ typedef struct _list_of_lists{
 
 
 
-double calc_Q(int* s, matrix* B, int n);
+double calc_Q(const int* s, matrix* B, int n);
 
 
 int division_to_2(matrix* Bg, int* s);
