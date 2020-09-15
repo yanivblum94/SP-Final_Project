@@ -16,6 +16,14 @@
 #include <string.h>
 #include "module_alg.h"
 
+void print_array(int* g, int n){
+	int i;
+	for(i = 0; i < n; i++){
+		printf("g[%d] = %d\n", i, g[i]);
+	}
+	printf("done\n");
+}
+
 
 /**
  * calculates Q value
@@ -115,12 +123,6 @@ void list_to_array(node* list, int* array){
 	}
 }
 
-void print_array(int* g, int n){
-	int i;
-	for(i = 0; i < n; i++){
-		printf("g[%d] = %d\n", i, g[i]);
-	}
-}
 
 /**
  * adds a group to the division
@@ -172,7 +174,7 @@ node* remove_group(list_of_lists* groups){
  * @return 1 if empty, 0 else
  */
 int is_empty(list_of_lists* groups){
-	if(groups == NULL){
+	if(groups == NULL || groups->node == NULL){
 		return 1;
 	}
 	else{
@@ -193,7 +195,6 @@ list_of_lists* divide_network(spmat* A, int size, int* ranks, double* ranks_m){
 	node *group;
 	matrix *Bg;
 	list_of_lists *groups, *non_divisible_groups;
-	char *func = "divide_network";
 	groups = (list_of_lists*)calloc(1, sizeof(list_of_lists));
 	non_divisible_groups = (list_of_lists*)calloc(1, sizeof(list_of_lists));
 	g = (int*)calloc(size, sizeof(int));
@@ -235,9 +236,7 @@ list_of_lists* divide_network(spmat* A, int size, int* ranks, double* ranks_m){
 						g2[j] = -1;
 					}
 				}
-				forceStop(func, 178);
 				group1 = arry_to_list(g1, size);
-				forceStop(func, 179);
 				group2 = arry_to_list(g2, size);
 				/*if one of the groups is empty or has only one element*/
 				if((group1 == NULL) || (group1->next == NULL)){ /*size of 0 or 1*/
@@ -258,7 +257,6 @@ list_of_lists* divide_network(spmat* A, int size, int* ranks, double* ranks_m){
 			/*forceStop(func, 195);*/
 	}
 	free(s);
-	forceStop(func, 196);
 	return non_divisible_groups;
 }
 
@@ -298,7 +296,10 @@ void modularity_maximization(matrix* B , int* s){
 	double Q0 , max_score=0.0, max_improve=0, deltaQ;
 	int n ,ng, i, j , max_score_vertex=0, max_improve_index;
 	int *unmoved, *indices;
+	char *func = " modularity_maximization";
 	n = B->size;
+	print_array(B->g, n);
+	forceStop(func, 305);
 	deltaQ = calc_Q(s, B, n)*2;
 	ng = calc_ng(B);
 	unmoved=(int*)calloc(ng,sizeof(int));
@@ -306,20 +307,20 @@ void modularity_maximization(matrix* B , int* s){
 	score=(double*)calloc(ng,sizeof(double));
 	improve=(double*)calloc(ng,sizeof(double));
 	while(deltaQ > 0){	/* main while according to line 31 of the alg'*/
-	unmoved_start(unmoved, ng);
-	for (i = 0; i < ng; ++i) {	/* lines 3-20 alg4*/
+		unmoved_start(unmoved, ng);
+		for (i = 0; i < ng; ++i) {	/* lines 3-20 alg4*/
 			Q0 = calc_Q(s, B, n)*2;
-			for (j = 0; j < ng; ++j) {/*for lines 6-10 on alg4 */
-				if(unmoved[j]>0){
-					s[j] = -s[j];
-					score[j] = (calc_Q(s, B, n)*2)-Q0;
-					s[j] = -s[j];
+				for (j = 0; j < ng; ++j) {/*for lines 6-10 on alg4 */
+					if(unmoved[j]>0){
+						s[j] = -s[j];
+						score[j] = (calc_Q(s, B, n)*2)-Q0;
+						s[j] = -s[j];
 					if(score[j] > max_score){
 						max_score_vertex = j;
 						max_score = score[j];
+						}
 					}
 				}
-			}
 			s[max_score_vertex] = -s[max_score_vertex];
 			indices[i] = max_score_vertex;
 			if(i == 0){

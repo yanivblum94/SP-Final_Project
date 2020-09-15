@@ -170,7 +170,6 @@ int main(int argc, char* argv[]){
 	double *ranks_m;
 	int size, m, n, sets_num, temp, asserter;
 	list_of_lists *sets;
-	char *func = "main";
 	printf("start running the program \n");
 	if(argc != 3){
 		printf("More/Less then 2 parameters have been given");
@@ -203,9 +202,7 @@ int main(int argc, char* argv[]){
 	m = calc_M(ranks,size);
 	calc_ranks_m(ranks, ranks_m, m, size);
 	sets = divide_network(A, size, ranks, ranks_m);
-	forceStop(func, 180);
 	sets_num = calc_num_sets(sets);
-	forceStop(func, 148);
 	output = fopen(argv[2], "w");
 	temp = fwrite(&sets_num, sizeof(int),1,output);/*write num of sets*/
 	if(temp!=1){

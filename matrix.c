@@ -13,7 +13,7 @@
 #include <math.h>
 #include <string.h>
 
-matrix* allocate_matrix(spmat *A, int size, int *k, double *km, int *g) {
+matrix* allocate_matrix(spmat *A, int size, int *k, double *km, int* g) {
 	matrix *matrixB = (matrix*) malloc(sizeof(matrix));
 	if (matrixB == NULL) {
 		free(matrixB);
@@ -61,7 +61,6 @@ void calc_f(const struct _matrix *B, double *f) {
 			}
 		}
 		f[i] = sum;
-		printf("f[&d]  %f \n", i, f[i]);
 	}
 }
 
@@ -265,16 +264,13 @@ void sum_4_vectors(const double *v1, const double *v2, const double *v3,
 
 void mult_shifted_matrix_with_vector(const struct _matrix *B, const double *v, double *result) {
 	double *v1, *v2, *v3, *f, *v4;
-	char *func;
 	int size = B->size;
-	func = "mult_shifted_matrix_with_vector";
 	f = (double*) calloc(size, sizeof(double));
 	v1 = (double*) calloc(size, sizeof(double));
 	v2 = (double*) calloc(size, sizeof(double));
 	v3 = (double*) calloc(size, sizeof(double));
 	v4 = (double*) calloc(size, sizeof(double));
 	calc_f(B, f);
-	forcestop(func, 276);
 	/*B->A->mult(B->A, v, v1);*/
 	mult_sparse_with_vector(B, v, v1);
 	mult_Kmatrix_with_vector(B, v, v2);
@@ -288,8 +284,7 @@ void mult_shifted_matrix_with_vector(const struct _matrix *B, const double *v, d
 	free(f);
 }
 
-void mult_matrix_with_vector(const struct _matrix *B, const int *v,
-		double *result) {
+void mult_matrix_with_vector(const struct _matrix *B, const int *v, double *result) {
 	double *v1, *v2, *v3, *f;
 	int size = B->size;
 	f = (double*) calloc(size, sizeof(double));
@@ -297,8 +292,8 @@ void mult_matrix_with_vector(const struct _matrix *B, const int *v,
 	v2 = (double*) calloc(size, sizeof(double));
 	v3 = (double*) calloc(size, sizeof(double));
 	calc_f(B, f);
-	mult_matrix_with_int_vector(B->A, v, v1);
-	/*mult_sparse_with_vector_int(B, v, v1);*/
+	/*mult_matrix_with_int_vector(B->A, v, v1);*/
+	mult_sparse_with_vector_int(B, v, v1);
 	mult_Kmatrix_with_vector_int(B, v, v2);
 	mult_vector_with_f_int(B, v, f, v3);
 	sum_3_vectors(v1, v2, v3, result, size);
