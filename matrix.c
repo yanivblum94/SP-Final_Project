@@ -61,6 +61,7 @@ void calc_f(const struct _matrix *B, double *f) {
 			}
 		}
 		f[i] = sum;
+		printf("f[&d]  %f \n", i, f[i]);
 	}
 }
 
