@@ -56,30 +56,28 @@ spmat* spmat_allocate(int n){
  * @param i - the row number
  * @param k - size of array
  */
-void add_row_in_list(struct _spmat *A, const double *row, int i, int k){
+void add_row_in_list(struct _spmat *A, const int *row, int i, int k){
 	int j,flag;
 	linked_list *elem, *curr;
 	flag =1;
 	((linked_list**)(A->private))[i] = NULL;
 	for(j = 0; j < k; j++){
-		if(row[j] != 0.0){
-			elem = (linked_list*)malloc(sizeof(linked_list));
-			if(elem==NULL){
-				A->free(A);
-				return;
-			}
-			elem->val = 1.0;
-			elem->col = row[j];
-			if(flag){
-				curr = elem;
-				((linked_list**)(A->private))[i] = curr;
-				flag=0;
-			}
-			else{
+		elem = (linked_list*)malloc(sizeof(linked_list));
+		if(elem==NULL){
+			A->free(A);
+			return;
+		}
+		elem->val = 1;
+		elem->col = row[j];
+		if(flag){
+			curr = elem;
+			((linked_list**)(A->private))[i] = curr;
+			flag=0;
+		}
+		else{
 				curr->next = elem;
 				curr= curr->next;
 				curr->next = NULL;
-			}
 		}
 	}
 }

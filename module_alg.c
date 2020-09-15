@@ -27,7 +27,8 @@
 double calc_Q(const int* s, matrix* B, int n){
 	double q;
 	double *result = (double*)malloc(n*sizeof(double));
-	mult_vector_with_matrix(B, s, result);
+	/*mult_vector_with_matrix(B, s, result);*/
+	mult_matrix_with_vector(B, s, result);
 	q = 0.5*(double)(mult_vectors_int(result, s, n));
 	free(result);
 	return q;

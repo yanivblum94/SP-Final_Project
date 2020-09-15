@@ -24,48 +24,33 @@
  * @param size - size if matrix
  */
 void read_mat(spmat* A, FILE *input, int* ranks, int size){
-	int i,k,j, flag;
+	int i,k;
 	int n;
-	double *row;
 	int *row_tmp;
 	/*char *func = "red_mat";*/
 	printf("entered read_mat \n");
 	for(i = 0; i < size; i++){
-		flag = 0;
 		n = fread(&k, sizeof(int), 1, input);
 		if(n != 1){
 			printf("Couldn't read the %d", i);
 		}
 		ranks[i] = k;
 		/*printf("ranks[%d] = %d\n" , i,ranks[i] );*/
-		if(k>0){
-		row = (double*)calloc(k, sizeof(double));
-		if(row == NULL){
-			printf("Couldn't allocate memory");
-		}
-		row_tmp = (int*)calloc(k, sizeof(int));
-		if(row_tmp == NULL){
-			printf("Couldn't allocate memory");
-		}
-		n = fread(row_tmp, sizeof(int), k, input);
-		if(n != k){
-			printf("Error in reading a row");
-		}
-		for(j = 0; j < k; j++){
-			/*printf("row_tmp[j] = %d  \n", row_tmp[j]);*/
-			if(row[j] != 0){
-				flag = 1;
+		if(k > 0){
+			row_tmp = (int*)calloc(k, sizeof(int));
+			if(row_tmp == NULL){
+				printf("Couldn't allocate memory");
 			}
-			row[j] = (double) row_tmp[j];
-		}
-		if(flag){
-			A->add_row(A, row, i, k);
-		}
-		free(row);
+			n = fread(row_tmp, sizeof(int), k, input);
+			if(n != k){
+				printf("Error in reading a row");
+			}
+		A->add_row(A, row_tmp, i, k);
 		free(row_tmp);
-	}
+		}
 	}
 }
+
 
 void print_mat(spmat* A){
 	int i;
@@ -76,7 +61,7 @@ void print_mat(spmat* A){
 		currlist = ((linked_list**)(A->private))[i];
 		while(currlist != NULL){
 			printf("  col:  %d" ,  currlist->col);
-			printf("  val:  %f" ,  currlist->val);
+			printf("  val:  %d" ,  currlist->val);
 			currlist = currlist->next;
 		}
 		printf("\n");
@@ -209,6 +194,7 @@ int main(int argc, char* argv[]){
 	}
 	A = spmat_allocate(size);
 	read_mat(A,input,ranks,size);
+	print_mat(A);
 	printf("read matrix A \n");
 	printf("matrix A size:  %d \n", A->n);
 	fclose(input);

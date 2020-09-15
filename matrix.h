@@ -54,5 +54,8 @@ void mult_shifted_matrix_with_vector(const struct _matrix* B, const double* v, d
 
 double calc_norm_1(const struct _matrix* Matrix);
 
+void mult_matrix_with_vector(const struct _matrix* B, const int* v, double* result);
+
+
 
 #endif /* MATRIX_H_ */

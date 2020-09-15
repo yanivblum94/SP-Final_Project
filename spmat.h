@@ -10,7 +10,7 @@ typedef struct _spmat {
 
 	/* Adds row i the matrix. Called before any other call,
 	 * exactly n times in order (i = 0 to n-1) */
-	void	(*add_row)(struct _spmat *A, const double *row, int i, int k);
+	void	(*add_row)(struct _spmat *A, const int *row, int i, int k);
 
 	/* Frees all resources used by A */
 	void	(*free)(struct _spmat *A);
@@ -27,7 +27,7 @@ typedef struct _spmat {
 typedef struct _linked_list{
 
 	/*value*/
-	double val;
+	int val;
 
 	/*column index*/
 	int col;
@@ -41,7 +41,7 @@ void forceStop(const char* func,const int line);
 /* Allocates a new linked-lists sparse matrix of size n */
 spmat* spmat_allocate(int n);
 
-void add_row_in_list(struct _spmat *A, const double *row, int i, int k);
+void add_row_in_list(struct _spmat *A, const int *row, int i, int k);
 
 void free_in_list(struct _spmat *A);
 
