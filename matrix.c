@@ -81,11 +81,11 @@ void mult_vector_with_Kmatrix(const struct _matrix *B, const int *v,
 	}
 }
 
-void mult_vector_with_I(const struct _matrix *B, double *result) {
+void mult_vector_with_I(const struct _matrix *B, const double *v, double *result) {
 	int i;
 	for (i = 0; i < B->size; i++) {
 		if (B->g[i] != 0) {
-			result[i] = B->c;
+			result[i] = (double)(B->c*v[i]);
 		}
 	}
 }
@@ -274,7 +274,7 @@ void mult_shifted_matrix_with_vector(const struct _matrix *B, const double *v, d
 	/*B->A->mult(B->A, v, v1);*/
 	mult_sparse_with_vector(B, v, v1);
 	mult_Kmatrix_with_vector(B, v, v2);
-	mult_vector_with_I(B, v3);
+	mult_vector_with_I(B, v, v3);
 	mult_vector_with_f_double(B, v, f, v4);
 	sum_4_vectors(v1, v2, v3, v4, result, size);
 	free(v2);

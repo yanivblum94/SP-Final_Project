@@ -52,7 +52,6 @@ int division_to_2(matrix* Bg, int* s){
 	double eigen_val;
 	double *eigenvector;
 	int size, i, is_divisible;
-	char *func = "division_to_2";
 	size = Bg->size;
 	is_divisible = 1;
 	eigenvector = (double*)malloc(size*sizeof(double));
@@ -75,7 +74,6 @@ int division_to_2(matrix* Bg, int* s){
 	}
 	else{
 		modularity_maximization(Bg ,s);
-		forceStop(func, 57);
 	}
 	free(eigenvector);
 	return is_divisible;
@@ -91,10 +89,10 @@ node* arry_to_list(int* array, int n){
 	node *curr_node, *elem, *list;
 	int i, first;
 	first = 1;
-	list = (node*)malloc(sizeof(node));
+	list = (node*)calloc(1, sizeof(node));
 	for(i = 0; i < n; i++){
 		if(array[i] != 0){
-			elem = (node*)malloc(sizeof(node));
+			elem = (node*)calloc(1, sizeof(node));
 			elem->val = i;
 			elem->next = NULL;
 			if(first){
@@ -141,11 +139,17 @@ void add_group(list_of_lists* groups, node* group){
 		while(groups->next != NULL){
 				groups = groups->next;
 			}
-			/*new_group = (list_of_lists*)malloc(sizeof(list_of_lists));
+		if(groups->next == NULL){
+			list_of_lists* new_group;
+			new_group = (list_of_lists*)calloc(1, sizeof(list_of_lists));
 			new_group->node = group;
-			new_group->next = NULL;*/
+			new_group->next = NULL;
+			groups->next = new_group;
+		}
+		else{
 			groups->next->node = group;
 			groups->next->next = NULL;
+		}
 	}
 }
 
@@ -251,8 +255,6 @@ list_of_lists* divide_network(spmat* A, int size, int* ranks, double* ranks_m){
 				else{
 					add_group(groups, group2);/*add to P*/
 				}
-				free(group1);
-				free(group2);
 			}
 			/*forceStop(func, 195);*/
 	}
@@ -296,10 +298,8 @@ void modularity_maximization(matrix* B , int* s){
 	double Q0 , max_score=0.0, max_improve=0, deltaQ;
 	int n ,ng, i, j , max_score_vertex=0, max_improve_index;
 	int *unmoved, *indices;
-	char *func = " modularity_maximization";
 	n = B->size;
 	print_array(B->g, n);
-	forceStop(func, 305);
 	deltaQ = calc_Q(s, B, n)*2;
 	ng = calc_ng(B);
 	unmoved=(int*)calloc(ng,sizeof(int));

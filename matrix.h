@@ -29,7 +29,7 @@ void calc_f(const struct _matrix* B, double* f);
 
 void mult_vector_with_Kmatrix(const struct _matrix* B, const int* v, double* result);
 
-void mult_vector_with_I(const struct _matrix* B, double* result);
+void mult_vector_with_I(const struct _matrix *B, const double *v, double *result);
 
 void sum_3_vectors(const double* v1, const double* v2,double* f,  double* result, int size);
 
