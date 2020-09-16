@@ -1,4 +1,8 @@
-
+/*
+ * module_alg.c
+ *
+ *      Author: irist
+ */
 
 #include "spmat.h"
 #include "matrix.h"
@@ -50,7 +54,6 @@ int division_to_2(matrix* Bg, int* s){
 	int size, i, is_divisible;
 	size = Bg->size;
 	is_divisible = 1;
-	printf("entered division_to_2\n");
 	eigenvector = (double*)malloc(size*sizeof(double));
 	eigen_val = calc_B_eigen_pair(Bg, eigenvector, size);
 	if(eigen_val <= 0){/*The group is indivisible*/
@@ -61,8 +64,11 @@ int division_to_2(matrix* Bg, int* s){
 			if(eigenvector[i] > 0){
 				s[i] = 1;
 			}
-			else{
+			else if (eigenvector[i] < 0){
 				s[i] = -1;
+			}
+			else{
+				s[i] = 0;
 			}
 		}
 	}
@@ -84,11 +90,13 @@ int division_to_2(matrix* Bg, int* s){
  */
 node* arry_to_list(int* array, int n){
 	node *curr_node, *elem, *list;
-	int i, first;
+	int i, first, flag;
 	first = 1;
+	flag = 1;
 	list = (node*)calloc(1, sizeof(node));
 	for(i = 0; i < n; i++){
 		if(array[i] != 0){
+			flag = 0;
 			elem = (node*)calloc(1, sizeof(node));
 			elem->val = i;
 			elem->next = NULL;
@@ -103,6 +111,9 @@ node* arry_to_list(int* array, int n){
 				curr_node->next = NULL;
 			}
 		}
+	}
+	if(flag){
+		list = NULL;
 	}
 	return list;
 }
@@ -234,29 +245,38 @@ list_of_lists* divide_network(spmat* A, int size, int* ranks, double* ranks_m){
 						g1[j] = 1;
 					}
 					else if(s[j] == -1){
-						g2[j] = -1;
+						g2[j] = 1;
 					}
 				}
 				group1 = arry_to_list(g1, size);
 				group2 = arry_to_list(g2, size);
 				/*if one of the groups is empty or has only one element*/
-				if((group1 == NULL) || (group1->next == NULL)){ /*size of 0 or 1*/
+				if(group1 == NULL || group2 == NULL){/*size of 0*/
+					if(group1 == NULL){
+						add_group(non_divisible_groups, group2);/*add to O*/
+					}
+					else{
+						add_group(non_divisible_groups, group1);/*add to O*/
+					}
+				}
+				else if(group1->next == NULL){/*size of 1*/
 					add_group(non_divisible_groups, group1);/*add to O*/
-				}
-				else{
-					add_group(groups, group1);/*add to P*/
-				}
-				if((group2 == NULL) || (group2->next == NULL)){ /*size of 0 or 1*/
-					add_group(non_divisible_groups, group2);/*add to O*/
-				}
-				else{
 					add_group(groups, group2);/*add to P*/
 				}
-			}
-			printf("%d, \n", is_empty(groups));
+				else if(group2->next == NULL){/*size of 1*/
+					add_group(non_divisible_groups, group2);/*add to O*/
+					add_group(groups, group1);/*add to P*/
+				}
+
+				else{
+					add_group(groups, group2);/*add to P*/
+					add_group(groups, group1);/*add to P*/
+				}
 			/*forceStop(func, 195);*/
 	}
+	}
 	free(s);
+	free(g);
 	return non_divisible_groups;
 }
 
@@ -296,9 +316,8 @@ void modularity_maximization(matrix* B , int* s){
 	double Q0 , max_score=0.0, max_improve=0, deltaQ;
 	int n ,ng, i, j , max_score_vertex=0, max_improve_index;
 	int *unmoved, *indices;
-	printf("entered modularity_maximization\n");
 	n = B->size;
-	/*print_array(B->g, n);*/
+	print_array(B->g, n);
 	deltaQ = calc_Q(s, B, n)*2;
 	ng = calc_ng(B);
 	unmoved=(int*)calloc(ng,sizeof(int));

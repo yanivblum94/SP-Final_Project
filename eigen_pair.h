@@ -1,5 +1,8 @@
-/**
- * This module holds all the functions which calculates eigen vectors and eigen values
+/*
+ * eigen_pair.h
+ *
+ *  Created on: 21 баев„ 2020
+ *      Author: irist
  */
 
 #ifndef EIGEN_PAIR_H_
