@@ -162,7 +162,12 @@ void calc_ranks_m(int* ranks, double* ranks_m, int m, int size){
 	}
 }
 
-
+/**
+ * the main program
+ * @param argc - num of args
+ * @param argv - the args
+ * @return 0 if succeded
+ */
 int main(int argc, char* argv[]){
 	FILE *input, *output;
 	spmat *A;

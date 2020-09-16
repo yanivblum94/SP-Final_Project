@@ -1,24 +1,25 @@
-/*
- * matrix.h
- *
- *      Author: irist
+/**
+ * this module represents the B and Bg matrixes. We divide it into 3 Matrixes - A, KiKj/M and cI
+ * KiKj/M is a mult of Ki/M vector and ranks(k) vector
  */
 
 #ifndef MATRIX_H_
 #define MATRIX_H_
-
+/**
+ * the struct representing the matrix
+ */
 typedef struct _matrix{
-	spmat* A;
+	spmat* A; /*spmat which we read from input*/
 
-	int size;
+	int size; /* size of A (nXn)*/
 
-	double c;
+	double c; /* the norm*/
 
-	int* k;
+	int* k; /*ranks vector*/
 
-	double* km;
+	double* km; /*Ki/M vector*/
 
-	int* g;
+	int* g; /*reprenets Bg - were g[i] is 1 = we count the row and col for Bg*/
 }matrix;
 
 matrix* allocate_matrix(spmat* A, int size, int* k, double* km, int* g);

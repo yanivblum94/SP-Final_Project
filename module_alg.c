@@ -1,8 +1,4 @@
-/*
- * module_alg.c
- *
- *      Author: irist
- */
+
 
 #include "spmat.h"
 #include "matrix.h"
@@ -54,6 +50,7 @@ int division_to_2(matrix* Bg, int* s){
 	int size, i, is_divisible;
 	size = Bg->size;
 	is_divisible = 1;
+	printf("entered division_to_2\n");
 	eigenvector = (double*)malloc(size*sizeof(double));
 	eigen_val = calc_B_eigen_pair(Bg, eigenvector, size);
 	if(eigen_val <= 0){/*The group is indivisible*/
@@ -256,6 +253,7 @@ list_of_lists* divide_network(spmat* A, int size, int* ranks, double* ranks_m){
 					add_group(groups, group2);/*add to P*/
 				}
 			}
+			printf("%d, \n", is_empty(groups));
 			/*forceStop(func, 195);*/
 	}
 	free(s);
@@ -298,8 +296,9 @@ void modularity_maximization(matrix* B , int* s){
 	double Q0 , max_score=0.0, max_improve=0, deltaQ;
 	int n ,ng, i, j , max_score_vertex=0, max_improve_index;
 	int *unmoved, *indices;
+	printf("entered modularity_maximization\n");
 	n = B->size;
-	print_array(B->g, n);
+	/*print_array(B->g, n);*/
 	deltaQ = calc_Q(s, B, n)*2;
 	ng = calc_ng(B);
 	unmoved=(int*)calloc(ng,sizeof(int));
