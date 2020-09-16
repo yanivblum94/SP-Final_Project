@@ -111,6 +111,7 @@ int calc_num_sets(list_of_lists* sets){
 	list_of_lists *curr =  sets;
 	res=0;
 	while(curr != NULL){
+		res++;
 		curr = curr->next;
 	}
 	free(curr);
@@ -222,6 +223,7 @@ int main(int argc, char* argv[]){
 					}
 		set = (int*)calloc(temp, sizeof(int));
 		list_to_arr(set, sets->node, temp);
+		print_array(set, temp);
 		asserter = fwrite(set, sizeof(int),temp,output);
 		if(asserter!=temp){
 			return 1;

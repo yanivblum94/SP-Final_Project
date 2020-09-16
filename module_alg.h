@@ -31,6 +31,7 @@ typedef struct _list_of_lists{
 }list_of_lists;
 
 
+void print_array(int* g, int n);
 
 double calc_Q(const int* s, matrix* B, int n);
 
