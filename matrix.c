@@ -13,6 +13,15 @@
 #include <math.h>
 #include <string.h>
 
+/**
+ * Allocates space for the B matrix
+ * @param A - A that we got from input
+ * @param size - size of A
+ * @param k - the ranks vector. k[0] = rank of node 0
+ * @param km - k[i]/M
+ * @param g - represents the nodes in Bg
+ * @return
+ */
 matrix* allocate_matrix(spmat *A, int size, int *k, double *km, int* g) {
 	matrix *matrixB = (matrix*) malloc(sizeof(matrix));
 	if (matrixB == NULL) {
@@ -29,6 +38,10 @@ matrix* allocate_matrix(spmat *A, int size, int *k, double *km, int* g) {
 	return matrixB;
 }
 
+/**
+ * frees the matrix
+ * @param Matrix
+ */
 void free_matrix(matrix *Matrix) {
 	Matrix->A->free(Matrix->A);
 	free(Matrix->g);
@@ -37,6 +50,11 @@ void free_matrix(matrix *Matrix) {
 	free(Matrix);
 }
 
+/**
+ * Calculates Fi diag matrix as a vector
+ * @param B - the matrix
+ * @param f - outcome f vector
+ */
 void calc_f(const struct _matrix *B, double *f) {
 	int j, i;
 	double sum, data;
@@ -81,6 +99,12 @@ void mult_vector_with_Kmatrix(const struct _matrix *B, const int *v,
 	}
 }
 
+/**
+ * Calculates cI diag matrix mults a vector
+ * @param B - the matrix holds the c value
+ * @param v - the vector we multiply cI with
+ * @param result - the outcome vector
+ */
 void mult_vector_with_I(const struct _matrix *B, const double *v, double *result) {
 	int i;
 	for (i = 0; i < B->size; i++) {
@@ -90,6 +114,14 @@ void mult_vector_with_I(const struct _matrix *B, const double *v, double *result
 	}
 }
 
+/**
+ * calculates Ai - BGi - Fi
+ * @param v1 - reps Ai
+ * @param v2 - reps Bgi
+ * @param f - Fi
+ * @param result - the outcome vector
+ * @param size- size of result
+ */
 void sum_3_vectors(const double *v1, const double *v2, double *f,
 		double *result, int size) {
 	int i;
@@ -161,6 +193,13 @@ void mult_vector_with_matrix(const struct _matrix *B, const int *s,
 	free(f);
 }
 
+/**
+ * calculates the mult of 2 double vectors
+ * @param v1 - 1st vector
+ * @param v2 - 2nd vector
+ * @param n - size of vectors
+ * @return - the result
+ */
 double mult_vectors_double(const double *v1, const double *v2, int n) {
 	int i;
 	double result = 0.0;
@@ -170,6 +209,13 @@ double mult_vectors_double(const double *v1, const double *v2, int n) {
 	return result;
 }
 
+/**
+ * calculates the mult of 2  vectors
+ * @param v1 - double vector
+ * @param v2 - int vector
+ * @param n - size of vectors
+ * @return - the result
+ */
 double mult_vectors_int(const double *v1, const int *v2, int n) {
 	int i;
 	double result = 0.0;
@@ -179,6 +225,12 @@ double mult_vectors_int(const double *v1, const int *v2, int n) {
 	return result;
 }
 
+/**
+ * Caluculates mult of sparse matrix with double vector
+ * @param B - the B matrix
+ * @param v - the vector we mult
+ * @param result - the outcome vector
+ */
 void mult_sparse_with_vector(const struct _matrix *B, const double *v,
 		double *result) {
 	int i, j;
@@ -199,6 +251,13 @@ void mult_sparse_with_vector(const struct _matrix *B, const double *v,
 		result[i] = sum;
 	}
 }
+
+/**
+ * Caluculates mult of sparse matrix with int vector
+ * @param B - the B matrix
+ * @param v - the vector we mult
+ * @param result - the outcome vector
+ */
 void mult_sparse_with_vector_int(const struct _matrix *B, const int *v,
 		double *result) {
 	int i, j;
@@ -220,6 +279,12 @@ void mult_sparse_with_vector_int(const struct _matrix *B, const int *v,
 	}
 }
 
+/**
+ * multiplies the Kij/M matrix with vector
+ * @param B - the B matrix
+ * @param v - the vector we multiply
+ * @param result - the outcome vector
+ */
 void mult_Kmatrix_with_vector(const struct _matrix *B, const double *v,
 		double *result) {
 	int i, j;
@@ -237,6 +302,12 @@ void mult_Kmatrix_with_vector(const struct _matrix *B, const double *v,
 	}
 }
 
+/**
+ * multiplies the Kij/M matrix with int vector
+ * @param B - the B matrix
+ * @param v - the vector we multiply
+ * @param result - the outcome vector
+ */
 void mult_Kmatrix_with_vector_int(const struct _matrix *B, const int *v,
 		double *result) {
 	int i, j;
@@ -254,6 +325,15 @@ void mult_Kmatrix_with_vector_int(const struct _matrix *B, const int *v,
 	}
 }
 
+/**
+ * does Ai - Bgi - F- + cI
+ * @param v1 - Ai
+ * @param v2 - Bgi
+ * @param v3 - cI
+ * @param f - Fi
+ * @param result - the outcome vector
+ * @param size - sie of vectors
+ */
 void sum_4_vectors(const double *v1, const double *v2, const double *v3,
 		const double *f, double *result, int size) {
 	int i;
@@ -262,6 +342,12 @@ void sum_4_vectors(const double *v1, const double *v2, const double *v3,
 	}
 }
 
+/**
+ * calcualtes mult of Bg_hat with vector
+ * @param B - the matrix
+ * @param v - the vector
+ * @param result - the outcome vector
+ */
 void mult_shifted_matrix_with_vector(const struct _matrix *B, const double *v, double *result) {
 	double *v1, *v2, *v3, *f, *v4;
 	int size = B->size;
@@ -284,6 +370,12 @@ void mult_shifted_matrix_with_vector(const struct _matrix *B, const double *v, d
 	free(f);
 }
 
+/**
+ * calcualtes mult of Bg with vector
+ * @param B - the matrix
+ * @param v - the vector
+ * @param result - the outcome vector
+ */
 void mult_matrix_with_vector(const struct _matrix *B, const int *v, double *result) {
 	double *v1, *v2, *v3, *f;
 	int size = B->size;
@@ -303,6 +395,11 @@ void mult_matrix_with_vector(const struct _matrix *B, const int *v, double *resu
 	free(f);
 }
 
+/**
+ * calculates the norm of Bg
+ * @param Matrix - Bg
+ * @return the norm
+ */
 double calc_norm_1(const struct _matrix *Matrix) {
 	int i, j, size, flag;
 	linked_list *currlist;
