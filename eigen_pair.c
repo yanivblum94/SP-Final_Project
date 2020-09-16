@@ -13,6 +13,11 @@
 
 static const double EPSILON = 0.00001;
 
+/**
+ * initializes random vector
+ * @param currvector - the vector we give values to
+ * @param n - size of vector
+ */
 void initialize_random_vector(double *currvector, int n){
 	int i;
 	srand(time(NULL));
@@ -21,6 +26,12 @@ void initialize_random_vector(double *currvector, int n){
 	}
 }
 
+/**
+ * calculates the norm of a vector
+ * @param nextvector - the vector we calculate the norm to
+ * @param n - size of vector
+ * @return the norm of the vector
+ */
 double calcnorm(double *nextvector, int n){
 	int i;
 	double sum;
@@ -31,6 +42,13 @@ double calcnorm(double *nextvector, int n){
 	return sqrt(sum);
 }
 
+/**
+ * PI that gets the vector closer to the eigen vector of the Matrix
+ * @param Matrix - the matrix we want the eigenvector of
+ * @param currvector - the current eigen vector we have
+ * @param nextvector - the vector after the iteration
+ * @param n - size od matrix
+ */
 void poweriteration(matrix *Matrix, double *currvector, double *nextvector, int n){
 	int i;
 	double norm;
@@ -41,6 +59,13 @@ void poweriteration(matrix *Matrix, double *currvector, double *nextvector, int 
 	}
 }
 
+/**
+ * Boolean function checking if the current eigen vec we have is "close enpugh" according to the epsilon defined to the next one we received from PI
+ * @param currvector - the current vector
+ * @param nextvector - the next vector we got
+ * @param n - size of vector
+ * @return - 1 if we close enough, 0 else
+ */
 int check(double *currvector, double *nextvector, int n){
 	int i;
 	for(i = 0; i < n; ++i){
@@ -51,6 +76,14 @@ int check(double *currvector, double *nextvector, int n){
 	return 1;
 }
 
+
+/**
+ * calculates the eigen vector
+ * @param Matrix - the matrix we calculate the eigen to
+ * @param currvector - the current vector we have
+ * @param nextvector - the next vector we get from PI - the final vector
+ * @param n - size of vector
+ */
 void calc_eigen(matrix* Matrix, double* currvector, double* nextvector, int n){
 	int i;
 	poweriteration(Matrix, currvector, nextvector, n);
@@ -61,7 +94,13 @@ void calc_eigen(matrix* Matrix, double* currvector, double* nextvector, int n){
 		poweriteration(Matrix, currvector, nextvector, n);
 	}
 }
-
+/**
+ * calculates the leading eigen value
+ * @param Matrix - the matrix we calculate the eigen val to
+ * @param eigenvector - the eigen vector
+ * @param n - size f eigen vector
+ * @return - eigen value
+ */
 double calc_eigen_val(matrix *Matrix, double *eigenvector, int n){
 	double eigenval;
 	double numerator, denominator;
