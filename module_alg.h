@@ -30,6 +30,7 @@ typedef struct _list_of_lists{
 
 }list_of_lists;
 
+void infinite_loop();
 
 void print_array(int* g, int n);
 

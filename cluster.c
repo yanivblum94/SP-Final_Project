@@ -181,7 +181,7 @@ int main(int argc, char* argv[]){
 		printf("More/Less then 2 parameters have been given");
 		return 1;
 	}
-	input = fopen(argv[1], "r");
+	input = fopen(argv[1], "rb");
 	if(input == NULL){
 		printf("Error in reading the file");
 		return 1;
@@ -206,10 +206,14 @@ int main(int argc, char* argv[]){
 	/*print_mat(A);*/
 	ranks_m = (double*)calloc(size, sizeof(double));
 	m = calc_M(ranks,size);
+	if(m==0){/*m is 0 - only exluded vetices*/
+		printf("m is 0 - error");
+		return 1;
+	}
 	calc_ranks_m(ranks, ranks_m, m, size);
 	sets = divide_network(A, size, ranks, ranks_m);
 	sets_num = calc_num_sets(sets);
-	output = fopen(argv[2], "w");
+	output = fopen(argv[2], "wb");
 	temp = fwrite(&sets_num, sizeof(int),1,output);/*write num of sets*/
 	if(temp!=1){
 		return 1;

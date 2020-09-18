@@ -15,6 +15,7 @@
 #include <math.h>
 #include <string.h>
 #include "module_alg.h"
+#define ISPOSITIVE(X) ((X) > 0.00001)
 
 void print_array(int* g, int n){
 	int i;
@@ -23,7 +24,13 @@ void print_array(int* g, int n){
 	}
 	printf("done\n");
 }
-
+/**
+ * terminates the program
+ */
+void infinite_loop(){
+	printf("infinte loop error\n");
+	exit(1);
+}
 
 /**
  * calculates Q value
@@ -203,7 +210,7 @@ int is_empty(list_of_lists* groups){
  * @return the list of divided sets
  */
 list_of_lists* divide_network(spmat* A, int size, int* ranks, double* ranks_m){
-	int i, j, is_divisible, *g, *g1, *g2, *s;
+	int i, j, is_divisible,counter=0, *g, *g1, *g2, *s;
 	node *group;
 	matrix *Bg;
 	list_of_lists *groups, *non_divisible_groups;
@@ -224,6 +231,9 @@ list_of_lists* divide_network(spmat* A, int size, int* ranks, double* ranks_m){
 	free(g);
 	/*free(group);*/
 	while(!is_empty(groups)){
+		if(counter > 1000 * A->n){
+					infinite_loop();
+				}
 		/*remove a group from P and represent the group as an int array g*/
 		group = remove_group(groups);
 		g = (int*)calloc(size, sizeof(int));
@@ -274,6 +284,7 @@ list_of_lists* divide_network(spmat* A, int size, int* ranks, double* ranks_m){
 				}
 			/*forceStop(func, 195);*/
 	}
+			counter++;
 	}
 	free(s);
 	free(g);
@@ -288,7 +299,7 @@ list_of_lists* divide_network(spmat* A, int size, int* ranks, double* ranks_m){
 void unmoved_start(int* unmoved,int ng){
 	int i;
 	for (i = 0; i < ng; ++i) {	/*making the unmoved group represnted by array*/
-				unmoved[i]=i;
+				unmoved[i]=0;
 		}
 }
 /**
@@ -306,64 +317,102 @@ int calc_ng(matrix* B){
 	}
 	return res;
 }
+
+/**
+ * rows 3 - 20 in Algo 4
+ * @param B - B matrix
+ * @param s - s vector
+ * @param ng - size of Bg
+ * @param improve - improve indices vector
+ * @param unmoved - unmoved vector from the algo
+ * @param indices - indices vector from the algo
+ */
+void find_partition_change(matrix *B, int *s, int ng, double *improve, int *unmoved, int *indices) {
+	int i, k, j, index_remove,first;
+	double max, q0;
+	double *score;
+	for (i = 0; i < ng; i++) {
+		score = (double*) calloc(ng, sizeof(double));
+		q0 = calc_Q(s, B, B->size)*2;
+		for (k = 0; k < ng; k++) {
+			if(!unmoved[k]){
+				s[k] = -s[k];
+				score[k] = calc_Q(s, B, B->size)*2 - q0;
+				s[k] = -s[k];
+			}
+		}
+		first = 1;
+		for (j = 0; j < ng; j++) {
+			if(!unmoved[j]){
+				if(first){
+					max = score[j];
+					index_remove = j;
+					first=0;
+				}else{
+					if (score[j] > max) {
+						max = score[j];
+						index_remove = j;
+					}
+				}
+			}
+		}
+		s[index_remove] = -s[index_remove];
+		indices[i] = index_remove;
+		if (i == 0){
+			improve[i] = max;
+		}
+		else{
+			improve[i] = improve[i - 1] + max;
+		}
+		unmoved[index_remove]=1;
+		free(score);
+	}
+}
  /**
   * Algo 4
   * @param B - B matrix
   * @param s - s vector
   */
 void modularity_maximization(matrix* B , int* s){
-	double *score , *improve ;
-	double Q0 , max_score=0.0, max_improve=0, deltaQ;
-	int n ,ng, i, j , max_score_vertex=0, max_improve_index;
+	double *improve ;
+	double  max_improve=0, deltaQ;
+	int n ,ng, i, j, max_improve_index, counter=0;
 	int *unmoved, *indices;
 	n = B->size;
 	print_array(B->g, n);
-	deltaQ = calc_Q(s, B, n)*2;
+	deltaQ = 1.0;
 	ng = calc_ng(B);
 	unmoved=(int*)calloc(ng,sizeof(int));
 	indices=(int*)calloc(ng,sizeof(int));
-	score=(double*)calloc(ng,sizeof(double));
 	improve=(double*)calloc(ng,sizeof(double));
-	while(deltaQ > 0){	/* main while according to line 31 of the alg'*/
+	while(ISPOSITIVE(deltaQ)){	/* main while according to line 31 of the alg'*/
+		if(counter >  1000 * B->size){
+					infinite_loop();
+				}
 		unmoved_start(unmoved, ng);
-		for (i = 0; i < ng; ++i) {	/* lines 3-20 alg4*/
-			Q0 = calc_Q(s, B, n)*2;
-				for (j = 0; j < ng; ++j) {/*for lines 6-10 on alg4 */
-					if(unmoved[j]>0){
-						s[j] = -s[j];
-						score[j] = (calc_Q(s, B, n)*2)-Q0;
-						s[j] = -s[j];
-					if(score[j] > max_score){
-						max_score_vertex = j;
-						max_score = score[j];
-						}
+		find_partition_change(B, s, ng, improve, unmoved, indices);
+		max_improve = improve[0];
+				max_improve_index = 0;
+
+				for (j = 0; j < ng; j++) {
+					if (improve[j] > max_improve) {
+						max_improve = improve[j];
+						max_improve_index = j;
 					}
 				}
-			s[max_score_vertex] = -s[max_score_vertex];
-			indices[i] = max_score_vertex;
-			if(i == 0){
-				improve[i] = score[max_score_vertex];
-				max_improve = improve[i];
-				max_improve_index = i;
-			}
-			else{
-				improve[i] = improve[i-1] + score[max_score_vertex];
-				if(improve[i] > max_improve){ /*maintain max_improve for next part*/
-					max_improve = improve[i];
-					max_improve_index = i;
-				}
-			}
-			unmoved[max_score_vertex] = -1;
-		}
 	for(i = ng-1; i > max_improve_index; --i){
 		s[indices[i]] = -s[indices[i]];
 	}
 	if(max_improve_index == (ng-1)){
 		deltaQ = 0;
 	}else{
-		deltaQ = improve[max_improve_index];
+		deltaQ = max_improve;
 		}
+	counter++;
 	}
+	free(unmoved);
+	free(indices);
+	free(improve);
 }
 
 /**
