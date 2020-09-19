@@ -23,7 +23,7 @@
  * @return
  */
 matrix* allocate_matrix(spmat *A, int size, int *k, double *km, int* g) {
-	matrix *matrixB = (matrix*) malloc(sizeof(matrix));
+	matrix *matrixB = (matrix*)calloc(1, sizeof(matrix));
 	if (matrixB == NULL) {
 		free(matrixB);
 		return NULL;
@@ -43,7 +43,7 @@ matrix* allocate_matrix(spmat *A, int size, int *k, double *km, int* g) {
  * @param Matrix
  */
 void free_matrix(matrix *Matrix) {
-	Matrix->A->free(Matrix->A);
+	free_in_list(Matrix->A);
 	free(Matrix->g);
 	free(Matrix->k);
 	free(Matrix->km);
@@ -82,22 +82,6 @@ void calc_f(const struct _matrix *B, double *f) {
 	}
 }
 
-void mult_vector_with_Kmatrix(const struct _matrix *B, const int *v,
-		double *result) {
-	int i, j;
-	double dotproduct;
-	for (j = 0; j < B->size; j++) {
-		dotproduct = 0.0;
-		if (B->g[j] != 0) {
-			for (i = 0; i < B->size; i++) {
-				if (B->g[i] != 0) {
-					dotproduct += B->km[i] * B->k[j] * v[i];
-				}
-			}
-		}
-		result[j] = dotproduct;
-	}
-}
 
 /**
  * Calculates cI diag matrix mults a vector
@@ -151,47 +135,6 @@ void mult_vector_with_f_double(const struct _matrix *B, const double *v,
 	}
 }
 
-void mult_vector_with_sparse(const struct _matrix *B, const int *v,
-		double *result) {
-	int i, j, size;
-	double dotproduct;
-	linked_list *currlist;
-	size = B->size;
-	for (j = 0; j < size; j++) {
-		dotproduct = 0.0;
-		if (B->g[j] != 0) {
-			for (i = 0; i < size; i++) {
-				currlist = ((linked_list**) (B->A->private))[i];
-				while (currlist != NULL && currlist->col <= j) {
-					if (currlist->col == j && B->g[currlist->col] != 0) {
-						dotproduct += (double) (currlist->val * v[i]);
-					}
-					currlist = currlist->next;
-				}
-			}
-		}
-		result[j] = dotproduct;
-	}
-}
-
-void mult_vector_with_matrix(const struct _matrix *B, const int *s,
-		double *result) {
-	double *v1, *v2, *f, *v3;
-	int size = B->size;
-	f = (double*) calloc(size, sizeof(double));
-	v1 = (double*) calloc(size, sizeof(double));
-	v2 = (double*) calloc(size, sizeof(double));
-	v3 = (double*) calloc(size, sizeof(double));
-	calc_f(B, f);
-	mult_vector_with_sparse(B, s, v1);
-	mult_vector_with_Kmatrix(B, s, v2);
-	mult_vector_with_f_int(B, s, f, v3);
-	sum_3_vectors(v1, v2, v3, result, size);
-	free(v1);
-	free(v2);
-	free(v3);
-	free(f);
-}
 
 /**
  * calculates the mult of 2 double vectors
@@ -226,7 +169,7 @@ double mult_vectors_int(const double *v1, const int *v2, int n) {
 }
 
 /**
- * Caluculates mult of sparse matrix with double vector
+ * Calculates mult of sparse matrix with double vector
  * @param B - the B matrix
  * @param v - the vector we mult
  * @param result - the outcome vector
@@ -253,7 +196,7 @@ void mult_sparse_with_vector(const struct _matrix *B, const double *v,
 }
 
 /**
- * Caluculates mult of sparse matrix with int vector
+ * Calculates mult of sparse matrix with int vector
  * @param B - the B matrix
  * @param v - the vector we mult
  * @param result - the outcome vector
@@ -285,22 +228,21 @@ void mult_sparse_with_vector_int(const struct _matrix *B, const int *v,
  * @param v - the vector we multiply
  * @param result - the outcome vector
  */
-void mult_Kmatrix_with_vector(const struct _matrix *B, const double *v,
-		double *result) {
-	int i, j;
-	double dotproduct;
+void mult_Kmatrix_with_vector(const struct _matrix *B, const double *v, double *result) {
+	int i;
+	double dotproduct = 0.0;
 	for (i = 0; i < B->size; i++) {
-		dotproduct = 0.0;
 		if (B->g[i] != 0) {
-			for (j = 0; j < B->size; j++) {
-				if (B->g[j] != 0) {
-					dotproduct += B->km[i] * B->k[j] * v[j];
-				}
-			}
+				dotproduct += B->k[i] * v[i];
 		}
-		result[i] = dotproduct;
+	}
+	for(i = 0; i < B->size; i++){
+		if (B->g[i] != 0) {
+			result[i] = dotproduct*(B->km[i]);
+		}
 	}
 }
+
 
 /**
  * multiplies the Kij/M matrix with int vector
@@ -308,20 +250,18 @@ void mult_Kmatrix_with_vector(const struct _matrix *B, const double *v,
  * @param v - the vector we multiply
  * @param result - the outcome vector
  */
-void mult_Kmatrix_with_vector_int(const struct _matrix *B, const int *v,
-		double *result) {
-	int i, j;
-	double dotproduct;
+void mult_Kmatrix_with_vector_int(const struct _matrix *B, const int *s, double *result) {
+	int i;
+	double dotproduct = 0.0;
 	for (i = 0; i < B->size; i++) {
-		dotproduct = 0.0;
 		if (B->g[i] != 0) {
-			for (j = 0; j < B->size; j++) {
-				if (B->g[j] != 0) {
-					dotproduct += (double) (B->km[i] * B->k[j] * v[j]);
-				}
+			dotproduct += (double)(B->k[i] * s[i]);
 			}
+	}
+	for(i = 0; i < B->size; i++){
+		if(B->g[i] != 0){
+			result[i] = (double) dotproduct*(B->km[i]);
 		}
-		result[i] = dotproduct;
 	}
 }
 

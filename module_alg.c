@@ -17,6 +17,40 @@
 #include "module_alg.h"
 #define ISPOSITIVE(X) ((X) > 0.00001)
 
+
+void free_linked_lists(list_of_lists* sets){
+	list_of_lists *temp_set;
+	node *list, *temp_list;
+	if(sets == NULL){
+		free(sets);
+	}
+	else{
+		while(sets != NULL){
+			list = sets->node;
+			while(list != NULL){
+				temp_list = list;
+				list = list->next;
+				free(temp_list);
+			}
+			free(list);
+			temp_set = sets;
+			sets = sets->next;
+			free(temp_set);
+		}
+		free(sets);
+	}
+}
+
+void free_node(node* group){
+	node *temp;
+	while(group != NULL){
+		temp = group;
+		group = group->next;
+		free(temp);
+	}
+	free(group);
+}
+
 void print_array(int* g, int n){
 	int i;
 	for(i = 0; i < n; i++){
@@ -41,8 +75,7 @@ void infinite_loop(){
  */
 double calc_Q(const int* s, matrix* B, int n){
 	double q;
-	double *result = (double*)malloc(n*sizeof(double));
-	/*mult_vector_with_matrix(B, s, result);*/
+	double *result = (double*)calloc(n, sizeof(double));
 	mult_matrix_with_vector(B, s, result);
 	q = 0.5*(double)(mult_vectors_int(result, s, n));
 	free(result);
@@ -61,21 +94,21 @@ int division_to_2(matrix* Bg, int* s){
 	int size, i, is_divisible;
 	size = Bg->size;
 	is_divisible = 1;
-	eigenvector = (double*)malloc(size*sizeof(double));
+	eigenvector = (double*)calloc(size, sizeof(double));
 	eigen_val = calc_B_eigen_pair(Bg, eigenvector, size);
 	if(eigen_val <= 0){/*The group is indivisible*/
 		is_divisible = 0;
 	}
 	else{
 		for(i = 0; i < size; i++){
-			if(eigenvector[i] > 0){
+			if(eigenvector[i] == 0){
+				s[i] = 0;
+			}
+			else if(eigenvector[i] > 0){
 				s[i] = 1;
 			}
-			else if (eigenvector[i] < 0){
-				s[i] = -1;
-			}
 			else{
-				s[i] = 0;
+				s[i] = -1;
 			}
 		}
 	}
@@ -100,7 +133,6 @@ node* arry_to_list(int* array, int n){
 	int i, first, flag;
 	first = 1;
 	flag = 1;
-	list = (node*)calloc(1, sizeof(node));
 	for(i = 0; i < n; i++){
 		if(array[i] != 0){
 			flag = 0;
@@ -143,12 +175,9 @@ void list_to_array(node* list, int* array){
  * @param group - the set we want to add
  */
 void add_group(list_of_lists* groups, node* group){
-	/*list_of_lists *new_group;*/
 	if(groups->node == NULL){/* empty set */
-		/*new_group = (list_of_lists*)malloc(sizeof(list_of_lists));*/
 		groups->node = group;
 		groups->next = NULL;
-		/*groups = new_group;*/
 	}
 	else{
 		while(groups->next != NULL){
@@ -174,15 +203,17 @@ void add_group(list_of_lists* groups, node* group){
  * @return - reeturns the removed set
  */
 node* remove_group(list_of_lists* groups){
-	list_of_lists* temp;
+	list_of_lists *temp, *elem_to_remove;
 	node *group = groups->node;
 	if (groups->next == NULL){/* the set contains only one group*/
 		groups->node = NULL;
 	}
 	else{
 		temp = groups->next->next;
+		elem_to_remove = groups->next;
 		groups->node = groups->next->node;
 		groups->next = temp;
+		free(elem_to_remove);
 	}
 	return group;
 }
@@ -200,6 +231,14 @@ int is_empty(list_of_lists* groups){
 		return 0;
 	}
 }
+
+void del_g(matrix* B){
+	int i;
+	for(i = 0; i < B->size; i++){
+		B->g[i] = 0;
+	}
+}
+
 
 /**
  * divides the graph into modularity sets
@@ -223,31 +262,26 @@ list_of_lists* divide_network(spmat* A, int size, int* ranks, double* ranks_m){
 	}
 	Bg = allocate_matrix(A, size, ranks, ranks_m, g);
 	Bg->c = calc_norm_1(Bg);
-	printf("norm is: %f \n" , Bg->c);
 	group = arry_to_list(g, size);
-	printf("size in matrix  %d \n", Bg->size);
 	add_group(groups, group);
-	printf("added 1st group\n");
-	free(g);
-	/*free(group);*/
 	while(!is_empty(groups)){
 		if(counter > 1000 * A->n){
 					infinite_loop();
 				}
 		/*remove a group from P and represent the group as an int array g*/
 		group = remove_group(groups);
-		g = (int*)calloc(size, sizeof(int));
-		list_to_array(group, g);
-		Bg->g = g;
-		print_array(Bg->g, size);
+		del_g(Bg);
+		list_to_array(group, Bg->g);
 		s = (int*)calloc(size, sizeof(int));
 		is_divisible = division_to_2(Bg, s);
 			if(!is_divisible){
 				/*add g to O*/
 				add_group(non_divisible_groups, group);
+				free(s);
 			}
 			else{
 				node *group1, *group2;
+				free_node(group);
 				g1 = (int*)calloc(size, sizeof(int));
 				g2 = (int*)calloc(size, sizeof(int));
 				for(j = 0; j < size; j++){
@@ -258,15 +292,20 @@ list_of_lists* divide_network(spmat* A, int size, int* ranks, double* ranks_m){
 						g2[j] = 1;
 					}
 				}
+				free(s);
 				group1 = arry_to_list(g1, size);
 				group2 = arry_to_list(g2, size);
+				free(g1);
+				free(g2);
 				/*if one of the groups is empty or has only one element*/
 				if(group1 == NULL || group2 == NULL){/*size of 0*/
 					if(group1 == NULL){
 						add_group(non_divisible_groups, group2);/*add to O*/
+						free(group1);
 					}
 					else{
 						add_group(non_divisible_groups, group1);/*add to O*/
+						free(group2);
 					}
 				}
 				else if(group1->next == NULL){/*size of 1*/
@@ -282,12 +321,12 @@ list_of_lists* divide_network(spmat* A, int size, int* ranks, double* ranks_m){
 					add_group(groups, group2);/*add to P*/
 					add_group(groups, group1);/*add to P*/
 				}
-			/*forceStop(func, 195);*/
 	}
 			counter++;
 	}
-	free(s);
-	free(g);
+
+	free_matrix(Bg);
+	free_linked_lists(groups);
 	return non_divisible_groups;
 }
 
@@ -376,10 +415,8 @@ void find_partition_change(matrix *B, int *s, int ng, double *improve, int *unmo
 void modularity_maximization(matrix* B , int* s){
 	double *improve ;
 	double  max_improve=0, deltaQ;
-	int n ,ng, i, j, max_improve_index, counter=0;
+	int ng, i, j, max_improve_index, counter=0;
 	int *unmoved, *indices;
-	n = B->size;
-	print_array(B->g, n);
 	deltaQ = 1.0;
 	ng = calc_ng(B);
 	unmoved=(int*)calloc(ng,sizeof(int));

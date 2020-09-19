@@ -8,10 +8,6 @@
 #include <math.h>
 #include <string.h>
 
-void forceStop(const char* func,const int line){
-	printf("\n ~ forced to stop in %s, line %d", func, line);
-	exit(EXIT_SUCCESS);
-}
 
 /**
  *  Allocates a new linked-lists sparse matrix of size n
@@ -62,7 +58,7 @@ void add_row_in_list(struct _spmat *A, const int *row, int i, int k){
 	flag =1;
 	((linked_list**)(A->private))[i] = NULL;
 	for(j = 0; j < k; j++){
-		elem = (linked_list*)malloc(sizeof(linked_list));
+		elem = (linked_list*)calloc(1, sizeof(linked_list));
 		if(elem==NULL){
 			A->free(A);
 			return;
@@ -187,6 +183,7 @@ double calc_norm_1_A(const struct _spmat *A){
 	}
 	return max;
 }
+
 
 
 

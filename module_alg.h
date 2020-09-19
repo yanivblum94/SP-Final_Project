@@ -62,7 +62,7 @@ int is_empty(list_of_lists* groups);
 
 double calc_B_eigen_pair(matrix* B, double *eigenvector, int n);
 
-
+void free_linked_lists(list_of_lists* sets);
 
 
 #endif /* MODULE_ALG_H_ */

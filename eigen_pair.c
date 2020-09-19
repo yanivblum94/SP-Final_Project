@@ -109,6 +109,7 @@ double calc_eigen_val(matrix *Matrix, double *eigenvector, int n){
 	numerator = mult_vectors_double(matrix_by_vec, eigenvector, n);
 	denominator = mult_vectors_double(eigenvector, eigenvector, n);
 	eigenval = numerator/denominator;
+	free(matrix_by_vec);
 	return eigenval;
 
 }

@@ -27,15 +27,9 @@ void free_matrix(matrix* Matrix);
 
 void calc_f(const struct _matrix* B, double* f);
 
-void mult_vector_with_Kmatrix(const struct _matrix* B, const int* v, double* result);
-
 void mult_vector_with_I(const struct _matrix *B, const double *v, double *result);
 
 void sum_3_vectors(const double* v1, const double* v2,double* f,  double* result, int size);
-
-void mult_vector_with_sparse(const struct _matrix* B, const int* v, double* result);
-
-void mult_vector_with_matrix(const struct _matrix* B, const int* s, double* result);
 
 double mult_vectors_double(const double* v1, const double* v2, int n);
 

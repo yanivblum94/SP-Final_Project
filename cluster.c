@@ -27,15 +27,12 @@ void read_mat(spmat* A, FILE *input, int* ranks, int size){
 	int i,k;
 	int n;
 	int *row_tmp;
-	/*char *func = "red_mat";*/
-	printf("entered read_mat \n");
 	for(i = 0; i < size; i++){
 		n = fread(&k, sizeof(int), 1, input);
 		if(n != 1){
 			printf("Couldn't read the %d", i);
 		}
 		ranks[i] = k;
-		/*printf("ranks[%d] = %d\n" , i,ranks[i] );*/
 		if(k > 0){
 			row_tmp = (int*)calloc(k, sizeof(int));
 			if(row_tmp == NULL){
@@ -52,23 +49,6 @@ void read_mat(spmat* A, FILE *input, int* ranks, int size){
 }
 
 
-void print_mat(spmat* A){
-	int i;
-	linked_list *currlist;
-	printf("entered print_mat \n");
-	for(i=0; i<A->n; i++){
-		printf("row:  %d ", i);
-		currlist = ((linked_list**)(A->private))[i];
-		while(currlist != NULL){
-			printf("  col:  %d" ,  currlist->col);
-			printf("  val:  %d" ,  currlist->val);
-			currlist = currlist->next;
-		}
-		printf("\n");
-	}
-
-}
-
 /**
  * calculates the value M
  * @param ranks - the ranks vector of the nodes
@@ -80,7 +60,6 @@ int calc_M(int* ranks,int size){
 	for(i=0; i< size; i++){
 		m += ranks[i];
 	}
-	printf("m = %d", m);
 	return m;
 }
 /**
@@ -159,7 +138,6 @@ void calc_ranks_m(int* ranks, double* ranks_m, int m, int size){
 	int i;
 	for(i = 0; i < size; i++){
 		ranks_m[i] = ((double)(ranks[i]))/((double)m);
-		printf("rank[%d] = %f" , i,ranks_m[i] );
 	}
 }
 
@@ -175,8 +153,7 @@ int main(int argc, char* argv[]){
 	int *ranks;
 	double *ranks_m;
 	int size, m, n, sets_num, temp, asserter;
-	list_of_lists *sets;
-	printf("start running the program \n");
+	list_of_lists *sets, *sets_p;
 	if(argc != 3){
 		printf("More/Less then 2 parameters have been given");
 		return 1;
@@ -186,12 +163,11 @@ int main(int argc, char* argv[]){
 		printf("Error in reading the file");
 		return 1;
 	}
-	printf("created input \n");
 	n = fread(&size, sizeof(int), 1, input);
 	if(n != 1){
 		printf("Error in reading the size of the matrix");
+		return 1;
 	}
-	printf("size=  %d \n" , size);
 	ranks = (int*)calloc(size, sizeof(int));
 	if(ranks == NULL){
 		printf("Error in allocation of memory");
@@ -199,11 +175,7 @@ int main(int argc, char* argv[]){
 	}
 	A = spmat_allocate(size);
 	read_mat(A,input,ranks,size);
-	print_mat(A);
-	printf("read matrix A \n");
-	printf("matrix A size:  %d \n", A->n);
 	fclose(input);
-	/*print_mat(A);*/
 	ranks_m = (double*)calloc(size, sizeof(double));
 	m = calc_M(ranks,size);
 	if(m==0){/*m is 0 - only exluded vetices*/
@@ -212,10 +184,12 @@ int main(int argc, char* argv[]){
 	}
 	calc_ranks_m(ranks, ranks_m, m, size);
 	sets = divide_network(A, size, ranks, ranks_m);
+	sets_p = sets;
 	sets_num = calc_num_sets(sets);
 	output = fopen(argv[2], "wb");
 	temp = fwrite(&sets_num, sizeof(int),1,output);/*write num of sets*/
 	if(temp!=1){
+		printf("Error in writing the number of sets");
 		return 1;
 	}
 	while(sets!=NULL){
@@ -227,19 +201,16 @@ int main(int argc, char* argv[]){
 					}
 		set = (int*)calloc(temp, sizeof(int));
 		list_to_arr(set, sets->node, temp);
-		print_array(set, temp);
 		asserter = fwrite(set, sizeof(int),temp,output);
 		if(asserter!=temp){
+			printf("Error in writing the vertices");
 			return 1;
 		}
 		sets = sets->next;
 		free(set);
 	}
-	free(ranks);
-	free(ranks_m);
-	free(sets);
+	free_linked_lists(sets_p);
 	fclose(output);
-	free_in_list(A);
 	return 0;
 }
 
